@@ -1,6 +1,12 @@
+import json
 import logging
+from http import HTTPStatus
 
-from fastapi import FastAPI
+import uvicorn
+
+from fastapi import FastAPI, HTTPException, File, UploadFile
+from pydantic import ValidationError
+
 from models import ArchitectureModel
 
 logging.basicConfig(
@@ -12,20 +18,28 @@ app = FastAPI()
 print("STARTED")
 
 
-@app.post("/architecture/load_from_json_body")
-async def update_item(model: ArchitectureModel):
-    # repr = format_architecture_model(model)
+@app.post("/architecture/load-from-json-file")
+async def load_from_json_file(architecture_file: bytes = File(..., alias='architecture-file')):
+    # by using `bytes` the FastAPI will read the file and give me its content in `bytes`
+    try:
+        architecture_dict = json.loads(architecture_file)
+        model = ArchitectureModel(**architecture_dict)
+    except ValidationError as e:
+        raise HTTPException(HTTPStatus.UNPROCESSABLE_ENTITY, "Invalid architecture file:\n{}".format(e))
+
     logging.info(model.id)
     logging.info(model.date_created)
+
     return dict(id=model.id, num_layers=len(model.layers))
 
 
-def format_architecture_model(model: ArchitectureModel):
-    res = "\nMODEL {} from {}\n".format(model.id, model.date_created)
-    res += "LAYERS:\n"
-    for l in model.layers:
-        res += "\tNAME {}, TYPE {}, INPUT_FROM {}\n".format(l.name, l.type, l.inputs)
-        for k, v in l.params.items():
-            res += "\t\t{}: {}\n".format(k, v)
+@app.post("/architecture/load-from-json-body")
+async def load_from_json_body(model: ArchitectureModel):
+    logging.info(model.id)
+    logging.info(model.date_created)
 
-    return res
+    return dict(id=model.id, num_layers=len(model.layers))
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -1,0 +1,59 @@
+{
+  "date_created": "2019-07-21 18:45:23",
+  "id": "086de44a-f785-4159-bd35-906fc2d36296",
+  "layers": [
+    {
+      "name": "Input_1",
+      "type": "Input",
+      "inputs": [],
+      "params": {
+        "input_shape": [
+          224,
+          224,
+          3
+        ],
+        "dtype": "uint8"
+      }
+    },
+    {
+      "name": "Flatten_1",
+      "type": "Flatten",
+      "inputs": [
+        "Input_1"
+      ],
+      "params": {
+        "data_format": "channels_last"
+      }
+    },
+    {
+      "name": "Dense_1",
+      "type": "Dense",
+      "inputs": [
+        "Flatten_1"
+      ],
+      "params": {
+        "activation": "relu",
+        "units": 1024,
+        "kernel_regularizer": {
+          "type": "l2",
+          "l": 0.003
+        }
+      }
+    },
+    {
+      "name": "Dense_2",
+      "type": "Dense",
+      "inputs": [
+        "Dense_1"
+      ],
+      "params": {
+        "activation": "sigmoid",
+        "units": 1,
+        "kernel_regularizer": {
+          "type": "l2",
+          "l": 0.001
+        }
+      }
+    }
+  ]
+}
