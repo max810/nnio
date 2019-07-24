@@ -14,9 +14,10 @@ print("STARTED")
 
 @app.post("/architecture/load_from_json_body")
 async def update_item(model: ArchitectureModel):
-    repr = format_architecture_model(model)
-    logging.info(repr)
-    return repr
+    # repr = format_architecture_model(model)
+    logging.info(model.id)
+    logging.info(model.date_created)
+    return dict(id=model.id, num_layers=len(model.layers))
 
 
 def format_architecture_model(model: ArchitectureModel):
