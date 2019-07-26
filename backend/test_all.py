@@ -1,11 +1,12 @@
+import unittest
 from io import StringIO
-
 from starlette.testclient import TestClient
 from http import HTTPStatus
 from .main import app
 from .models import LayerTypes
 
 client = TestClient(app)
+unittest.TestCase.maxDiff = 5000
 
 
 def test_load_from_json_body_empty():
@@ -27,7 +28,7 @@ def test_load_from_json_body_incorrect_with_id():
 
 
 def test_load_from_json_body_correct():
-    data = dict(date_created="2019-07-24 17:56:34", id="my_id_1", layers=[])
+    data = dict(date_created="2019-07-24 17:56:34", id="my_id_1", layers=[], name='MyModel_1')
     response = client.request('post', '/architecture/load-from-json-body', json=data)
 
     assert response.status_code == HTTPStatus.OK
@@ -44,7 +45,7 @@ def test_load_from_json_body_incorrect_multiple_layers():
 
 
 def test_load_from_json_body_correct_multiple_layers():
-    data = dict(date_created="2019-07-24 17:56:34", id="my_id_1", layers=[])
+    data = dict(date_created="2019-07-24 17:56:34", id="my_id_1", layers=[], name='MyModel_1')
     data['layers'].append(dict(name='Input_1', type=LayerTypes.Input, inputs=[], params=dict()))
     data['layers'].append(dict(name='Dense_1', type=LayerTypes.Dense, inputs=['Input_1'], params=dict()))
     response = client.request('post', '/architecture/load-from-json-body', json=data)
@@ -64,7 +65,7 @@ def test_load_from_json_file_correct():
     response = client.request('post', '/architecture/load-from-json-file', files=files)
 
     assert response.status_code == HTTPStatus.OK
-    assert response.json() == {"id": "086de44a-f785-4159-bd35-906fc2d36296", "num_layers": 4}
+    assert response.json().items() >= {"id": "086de44a-f785-4159-bd35-906fc2d36296", "num_layers": 4}.items()
 
 
 def test_load_from_json_file_incorrect_json():
@@ -79,3 +80,16 @@ def test_load_from_json_file_incorrect_data():
     response = client.request('post', '/architecture/load-from-json-file', files=files)
 
     assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+
+
+def test_load_from_json_file_model_creation():
+    files = {"architecture-file": open("ExampleDiplomaArchitecture.json", 'rt')}
+    response = client.request('post', '/architecture/load-from-json-file', files=files)
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json()["model"] == "{}<br>{}<br>{}<br>{}<br>".format(
+        "Input_1 -> Flatten_1",
+        "Input_1 -> Flatten_1 -> Dense_1",
+        "Flatten_1 -> Dense_1 -> Dense_2",
+        "Dense_1 -> Dense_2",
+    )
