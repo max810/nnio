@@ -1,4 +1,3 @@
-import unittest
 from io import StringIO
 from starlette.testclient import TestClient
 from http import HTTPStatus
@@ -6,7 +5,6 @@ from .main import app
 from .models import LayerTypes
 
 client = TestClient(app)
-unittest.TestCase.maxDiff = 5000
 
 
 def test_load_from_json_body_empty():
@@ -32,7 +30,7 @@ def test_load_from_json_body_correct():
     response = client.request('post', '/architecture/load-from-json-body', json=data)
 
     assert response.status_code == HTTPStatus.OK
-    assert response.json() == {"id": "my_id_1", "num_layers": 0}
+    assert response.json().items() >= {"id": "my_id_1", "num_layers": 0}.items()
 
 
 def test_load_from_json_body_incorrect_multiple_layers():
@@ -51,7 +49,7 @@ def test_load_from_json_body_correct_multiple_layers():
     response = client.request('post', '/architecture/load-from-json-body', json=data)
 
     assert response.status_code == HTTPStatus.OK
-    assert response.json() == {"id": "my_id_1", "num_layers": 2}
+    assert response.json().items() >= {"id": "my_id_1", "num_layers": 2}.items()
 
 
 def test_load_from_json_file_empty():

@@ -20,6 +20,9 @@ print("STARTED")
 
 @app.post("/architecture/load-from-json-file")
 async def load_from_json_file(architecture_file: bytes = File(..., alias='architecture-file')):
+    """
+    Example request file: https://jsoneditoronline.org/?id=24ce7b7c485c42f7bec3c27a4f437afd
+    """
     # by using `bytes` the FastAPI will read the file and give me its content in `bytes`
     try:
         architecture_dict = json.loads(architecture_file)
