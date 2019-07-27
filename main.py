@@ -7,6 +7,7 @@ import uvicorn
 from fastapi import FastAPI, HTTPException, File, UploadFile
 from pydantic import ValidationError
 
+from model_exporting import KNOWN_FRAMEWORKS
 from models import ArchitectureDataModel, LayerData, NetworkModel
 
 logging.basicConfig(
@@ -18,8 +19,9 @@ app = FastAPI()
 print("STARTED")
 
 
-@app.post("/architecture/load-from-json-file")
-async def load_from_json_file(architecture_file: bytes = File(..., alias='architecture-file')):
+@app.post("/architecture/export-from-json-file")
+async def export_from_json_file(framework: str,
+                                architecture_file: bytes = File(..., alias='architecture-file')) -> str:
     """
     Example request file: https://jsoneditoronline.org/?id=24ce7b7c485c42f7bec3c27a4f437afd
     """
@@ -30,15 +32,18 @@ async def load_from_json_file(architecture_file: bytes = File(..., alias='archit
     except ValidationError as e:
         raise HTTPException(HTTPStatus.UNPROCESSABLE_ENTITY, "Invalid architecture file:\n{}".format(e))
 
-    logging.info(model.id)
-    logging.info(model.date_created)
-    net_model = NetworkModel.from_data_model(model)
-
-    return dict(id=model.id, num_layers=len(model.layers), model=model_to_string(net_model))
+    return await export_from_json_body(framework, model)  # export_model(framework, model)
 
 
-@app.post("/architecture/load-from-json-body")
-async def load_from_json_body(model: ArchitectureDataModel):
+@app.post("/architecture/export-from-json-body")
+async def export_from_json_body(framework: str,
+                                model: ArchitectureDataModel) -> str:
+    framework = framework.lower()
+    if framework not in KNOWN_FRAMEWORKS:
+        raise HTTPException(HTTPStatus.BAD_REQUEST,
+                            "Unknown framework {}, known frameworks are: {}".format(framework, KNOWN_FRAMEWORKS))
+
+    logging.info(framework)
     logging.info(model.id)
     logging.info(model.date_created)
     net_model = NetworkModel.from_data_model(model)
