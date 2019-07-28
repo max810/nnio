@@ -4,6 +4,30 @@ from enum import Enum
 from typing import List, Dict, Iterable
 from pydantic import BaseModel
 
+indents = {
+    'tabs': "\t",
+    "2_spaces": " " * 2,
+    "4_spaces": " " * 4,
+    "8_spaces": " " * 8,
+}
+
+line_breaks = {
+    "crlf": "\r\n",
+    "lf": "\n",
+}
+
+
+# class LineBreak(Enum):
+#     CRLF: str = "crlf"
+#     LF: str = "lf"
+#
+#
+# class Indent(Enum):
+#     tabs: str = "tabs"
+#     two_spaces: str = "2_spaces"
+#     four_spaces: str = "4_spaces"
+#     eight_spaces: str = "8_spaces"
+
 
 class LayerTypes(str, Enum):
     Dense = "Dense"
