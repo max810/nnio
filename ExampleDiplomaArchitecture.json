@@ -4,8 +4,8 @@
   "name": "MyModel_1",
   "layers": [
     {
-      "name": "Input_1",
-      "type": "Input",
+      "name": "Flatten_1",
+      "type": "Flatten",
       "inputs": [],
       "params": {
         "input_shape": [
@@ -13,16 +13,6 @@
           224,
           3
         ],
-        "dtype": "uint8"
-      }
-    },
-    {
-      "name": "Flatten_1",
-      "type": "Flatten",
-      "inputs": [
-        "Input_1"
-      ],
-      "params": {
         "data_format": "channels_last"
       }
     },

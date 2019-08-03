@@ -60,7 +60,7 @@ class Layer(LayerBase):
         return Layer(**layer_attrs)
 
     def __repr__(self):
-        return self.name
+        return f"{self.name}({self.type})"
 
 
 Layer.update_forward_refs()

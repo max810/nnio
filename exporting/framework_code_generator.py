@@ -12,3 +12,7 @@ class FrameworkCodeGenerator(ABC):
     @abstractmethod
     def generate_code(self) -> str:
         pass
+
+    @abstractmethod
+    def _generate_imports(self) -> str:
+        pass

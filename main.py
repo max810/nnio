@@ -1,8 +1,10 @@
 import json
 import logging
+from ast import literal_eval
 from http import HTTPStatus
 from starlette.requests import Request
 import uvicorn
+from starlette.responses import PlainTextResponse
 
 from fastapi import FastAPI, HTTPException, File
 from pydantic import ValidationError
@@ -23,8 +25,8 @@ print("STARTED")
 async def export_from_json_file(framework: str,
                                 request: Request,
                                 architecture_file: bytes = File(..., alias='architecture-file'),
-                                line_break: str = line_breaks["lf"],
-                                indent: str = indents["4_spaces"]):
+                                line_break: str = "lf",
+                                indent: str = "4_spaces"):
     """
     Example request file: https://jsoneditoronline.org/?id=24ce7b7c485c42f7bec3c27a4f437afd
     """
@@ -42,23 +44,31 @@ async def export_from_json_file(framework: str,
 async def export_from_json_body(framework: str,
                                 request: Request,
                                 model: ArchitectureDataModel,
-                                line_break: str = line_breaks["lf"],
-                                indent: str = indents["4_spaces"]):
+                                line_break: str = "lf",
+                                indent: str = "4_spaces"):
     framework = framework.lower()
     validate_member_in(framework, KNOWN_FRAMEWORKS, "framework")
 
     line_break = line_break.lower()
-    validate_member_in(line_break, list(line_breaks), "line_break")
+    validate_member_in(line_break, line_breaks, "line_break")
 
     indent = indent.lower()
-    validate_member_in(indent, list(indents), "indent")
+    validate_member_in(indent, indents, "indent")
 
     logging.info(framework)
     logging.info(model.id)
     logging.info(model.date_created)
     net_model = NetworkModel.from_data_model(model)
 
-    return export_model(net_model, framework, line_break, indent, **request)
+    line_break_str = line_breaks[line_break]
+    indent_str = indents[indent]
+
+    framework_specific_params = dict(request.query_params)
+    del framework_specific_params['framework']
+
+    source_code = export_model(net_model, framework, line_break_str, indent_str, **framework_specific_params)
+
+    return PlainTextResponse(source_code)
 
 
 def validate_member_in(member, collection, member_name):
@@ -67,10 +77,10 @@ def validate_member_in(member, collection, member_name):
                             f"Unknown {member_name} {member}, known {member_name}s are: {collection}")
 
 
-@app.post("/test")
-async def test(**kwargs):
-    return kwargs
-
+# @app.post("/test")
+# async def test(**kwargs):
+#     return kwargs
+#
 
 def model_to_string(model: NetworkModel):
     res = ""
