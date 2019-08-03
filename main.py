@@ -21,6 +21,11 @@ app = FastAPI()
 print("STARTED")
 
 
+# TODO:
+#  1) add beautifier after generating code
+#  2) add convert from/to Sequential/Functional models in Keras
+#      (just remove/add Input layer and add/remove [input_]shape)
+
 @app.post("/architecture/export-from-json-file")
 async def export_from_json_file(framework: str,
                                 request: Request,
