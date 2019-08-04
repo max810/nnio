@@ -14,8 +14,9 @@ class PythonCodeGenerator:
     @staticmethod
     def wrap_literal(value: str):
         try:
-            # value is a valid python literal
             eval(str(value))
+
+            # we know that `value` is a valid python literal
             return value
         except (NameError, SyntaxError):
             # adding quotes for possible string literals
@@ -68,6 +69,10 @@ class PythonCodeGenerator:
         return PythonCodeGenerator.surrounded(code, "(", ")")
 
     @staticmethod
+    def list(code: str):
+        return PythonCodeGenerator.surrounded(code, '[', ']')
+
+    @staticmethod
     def sequence(items: Iterable[str], trailing_comma: bool = False, trailing_space: bool = False):
         s = ", ".join(map(str, items))
         if trailing_comma and s:
@@ -92,8 +97,8 @@ class PythonCodeGenerator:
         s = callable_name
         all_arguments = self.sequence(
             args,
-            trailing_comma=True,
-            trailing_space=True
+            trailing_comma=False,
+            trailing_space=False
         )
         kw_list = ["{}={}".format(k, v) for k, v in kwargs.items()]
         all_arguments += self.sequence(kw_list)

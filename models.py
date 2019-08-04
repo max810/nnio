@@ -17,16 +17,8 @@ line_breaks = {
 }
 
 
-# class LineBreak(Enum):
-#     CRLF: str = "crlf"
-#     LF: str = "lf"
-#
-#
-# class Indent(Enum):
-#     tabs: str = "tabs"
-#     two_spaces: str = "2_spaces"
-#     four_spaces: str = "4_spaces"
-#     eight_spaces: str = "8_spaces"
+class FrameworkError(Exception):
+    pass
 
 
 class LayerTypes(str, Enum):
@@ -35,6 +27,7 @@ class LayerTypes(str, Enum):
     BatchNormalization = "BatchNormalization"
     Dropout = "Dropout"
     Flatten = "Flatten"
+    Concatenate = "Concatenate"
 
 
 class LayerBase(BaseModel):

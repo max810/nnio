@@ -11,7 +11,10 @@ def export_model(model: NetworkModel, framework: str, line_break: str, indent: s
     return exporter(model, cg, **kwargs)
 
 
-def export_keras(model: NetworkModel, cg: PythonCodeGenerator, use_sequential=False, **kwargs):
+def export_keras(model: NetworkModel, cg: PythonCodeGenerator, **kwargs):
+    use_sequential_arg = str(kwargs.get('use-sequential', False))
+    use_sequential = use_sequential_arg.lower() in ['true', 't', '1', 'y', 'yes']
+
     if use_sequential:
         gen = KerasSequentialGenerator(model, cg)
     else:

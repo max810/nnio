@@ -4,15 +4,47 @@
   "name": "MyModel_1",
   "layers": [
     {
-      "name": "Flatten_1",
-      "type": "Flatten",
+      "name": "Input_1",
+      "type": "Input",
       "inputs": [],
       "params": {
-        "input_shape": [
+        "shape": [
           224,
           224,
           3
         ],
+        "dtype": "float32"
+      }
+    },
+    {
+      "name": "Input_2",
+      "type": "Input",
+      "inputs": [],
+      "params": {
+        "shape": [
+          224,
+          224,
+          3
+        ],
+        "dtype": "float32"
+      }
+    },
+    {
+      "name": "Concatenate_1",
+      "type": "Concatenate",
+      "inputs": [
+        "Input_1",
+        "Input_2"
+      ],
+      "params": {}
+    },
+    {
+      "name": "Flatten_1",
+      "type": "Flatten",
+      "inputs": [
+        "Concatenate_1"
+      ],
+      "params": {
         "data_format": "channels_last"
       }
     },

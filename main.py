@@ -10,7 +10,7 @@ from fastapi import FastAPI, HTTPException, File
 from pydantic import ValidationError
 
 from exporting.model_exporting import KNOWN_FRAMEWORKS, export_model
-from models import ArchitectureDataModel, NetworkModel, line_breaks, indents
+from models import ArchitectureDataModel, NetworkModel, line_breaks, indents, FrameworkError
 
 logging.basicConfig(
     level=logging.INFO,
@@ -23,8 +23,7 @@ print("STARTED")
 
 # TODO:
 #  1) add beautifier after generating code
-#  2) add convert from/to Sequential/Functional models in Keras
-#      (just remove/add Input layer and add/remove [input_]shape)
+#  2) check for dtype - it should be the same for all layer or not given at all
 
 @app.post("/architecture/export-from-json-file")
 async def export_from_json_file(framework: str,
@@ -71,9 +70,11 @@ async def export_from_json_body(framework: str,
     framework_specific_params = dict(request.query_params)
     del framework_specific_params['framework']
 
-    source_code = export_model(net_model, framework, line_break_str, indent_str, **framework_specific_params)
-
-    return PlainTextResponse(source_code)
+    try:
+        source_code = export_model(net_model, framework, line_break_str, indent_str, **framework_specific_params)
+        return PlainTextResponse(source_code)
+    except FrameworkError as e:
+        return HTTPException(HTTPStatus.BAD_REQUEST, str(e))
 
 
 def validate_member_in(member, collection, member_name):
