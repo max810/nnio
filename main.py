@@ -1,16 +1,16 @@
-import json
 import logging
-from ast import literal_eval
-from http import HTTPStatus
+
 from starlette.requests import Request
+from starlette.responses import Response
+
+import DAL
 import uvicorn
-from starlette.responses import PlainTextResponse
+from fastapi import FastAPI
 
-from fastapi import FastAPI, HTTPException, File
-from pydantic import ValidationError
-
-from exporting.model_exporting import KNOWN_FRAMEWORKS, export_model
-from models import ArchitectureDataModel, NetworkModel, line_breaks, indents, FrameworkError
+from DAL import models
+from routers import architecture_exporting, users
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, Session
 
 logging.basicConfig(
     level=logging.INFO,
@@ -18,90 +18,54 @@ logging.basicConfig(
 )
 
 app = FastAPI()
-print("STARTED")
+app.include_router(
+    architecture_exporting.router,
+    prefix='/architecture',
+    tags=['Neural network architecture exporting to code']
+)
+
+app.include_router(
+    users.router,
+    prefix='/user',
+    tags=['User authentication and authorization']
+)
+
+SQLALCHEMY_DATABASE_URL = "sqlite:///./storage.db"
+
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+DAL.models.Base.metadata.create_all(bind=engine)
 
 
-# TODO:
-#  1) add beautifier after generating code
-#  2) check for dtype - it should be the same for all layer or not given at all
-
-@app.post("/architecture/export-from-json-file")
-async def export_from_json_file(framework: str,
-                                request: Request,
-                                architecture_file: bytes = File(..., alias='architecture-file'),
-                                line_break: str = "lf",
-                                indent: str = "4_spaces"):
-    """
-    Example request file: https://jsoneditoronline.org/?id=24ce7b7c485c42f7bec3c27a4f437afd
-    """
-    # by using `bytes` the FastAPI will read the file and give me its content in `bytes`
+@app.middleware("http")
+async def db_session_middleware(request: Request, call_next):
+    response = Response("Internal server error", status_code=500)
     try:
-        architecture_dict = json.loads(architecture_file)
-        model = ArchitectureDataModel(**architecture_dict)
-    except ValidationError as e:
-        raise HTTPException(HTTPStatus.UNPROCESSABLE_ENTITY, "Invalid architecture file:\n{}".format(e))
+        request.state.db = SessionLocal()
+        response = await call_next(request)
+    finally:
+        request.state.db.close()
 
-    return await export_from_json_body(framework, request, model, line_break, indent)
-
-
-@app.post("/architecture/export-from-json-body")
-async def export_from_json_body(framework: str,
-                                request: Request,
-                                model: ArchitectureDataModel,
-                                line_break: str = "lf",
-                                indent: str = "4_spaces"):
-    framework = framework.lower()
-    validate_member_in(framework, KNOWN_FRAMEWORKS, "framework")
-
-    line_break = line_break.lower()
-    validate_member_in(line_break, line_breaks, "line_break")
-
-    indent = indent.lower()
-    validate_member_in(indent, indents, "indent")
-
-    logging.info(framework)
-    logging.info(model.id)
-    logging.info(model.date_created)
-    net_model = NetworkModel.from_data_model(model)
-
-    line_break_str = line_breaks[line_break]
-    indent_str = indents[indent]
-
-    framework_specific_params = dict(request.query_params)
-    del framework_specific_params['framework']
-
-    try:
-        source_code = export_model(net_model, framework, line_break_str, indent_str, **framework_specific_params)
-        return PlainTextResponse(source_code)
-    except FrameworkError as e:
-        return HTTPException(HTTPStatus.BAD_REQUEST, str(e))
-
-
-def validate_member_in(member, collection, member_name):
-    if member not in collection:
-        raise HTTPException(HTTPStatus.BAD_REQUEST,
-                            f"Unknown {member_name} {member}, known {member_name}s are: {collection}")
-
-
-# @app.post("/test")
-# async def test(**kwargs):
-#     return kwargs
-#
-
-def model_to_string(model: NetworkModel):
-    res = ""
-    for l in model.layers:
-        if l.inputs:
-            res += ", ".join(i.name for i in l.inputs)
-            res += " -> "
-        res += l.name
-        if l.outputs:
-            res += " -> "
-            res += ", ".join(o.name for o in l.outputs)
-        res += '<br>'
-
-    return res
+    return response
 
 
 if __name__ == "__main__":
+    sess: Session = SessionLocal()
+    logging.info("About to create a user")
+    user = sess.query(models.User).filter(models.User.email == 'admin@gmail.com').first()
+    if not user:
+        user = models.User(email='admin@gmail.com', hashed_password='test_password')
+        sess.add(user)
+        sess.commit()
+        sess.refresh(user)
+    else:
+        logging.info("EXISTS")
+    logging.info(user.id)
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+# TODO:
+#  1) add beautifier after generating code
+#  2) Add admin page to maintain supported layers and their params
+#  3) DTYPE WILL NOT BE IN THE MODEL(check for dtype - it should be the same for all layer or not given at all)

@@ -1,4 +1,4 @@
-from exporting.keras_generators import KerasSequentialGenerator, KerasFunctionalGenerator
+from BLL.exporting.keras_generators import KerasSequentialGenerator, KerasFunctionalGenerator
 from .python_code_generator import PythonCodeGenerator
 from models import NetworkModel
 
