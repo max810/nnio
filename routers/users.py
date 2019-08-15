@@ -1,32 +1,26 @@
+import json
 import logging
 import os
-
-from sqlalchemy.orm import Session
-from starlette.requests import Request
-
-from fastapi import HTTPException, APIRouter, Depends
-
-from DAL import schemas, users_repository, models
 from datetime import datetime, timedelta
+from pathlib import Path
 
 import jwt
-from fastapi import Depends, FastAPI, HTTPException
+from sqlalchemy.orm import Session
+from starlette.requests import Request
+from fastapi import Depends, FastAPI, HTTPException, APIRouter
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jwt import PyJWTError
-from passlib.context import CryptContext
 from pydantic import BaseModel
 from starlette.status import HTTP_401_UNAUTHORIZED
+
+from DAL import schemas, users_repository, models
+from routers.common import SECRET_KEY, ALGORITHM, oauth2_scheme, ACCESS_TOKEN_EXPIRE_MINUTES, templates
+
+router = APIRouter()
 
 
 def get_db(request: Request):
     return request.state.db
-
-
-router = APIRouter()
-SECRET_KEY = os.environ['JWT_SECRET_KEY']
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 1
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
 
 class Token(BaseModel):
@@ -113,6 +107,27 @@ async def test_token(db: Session = Depends(get_db), token: str = Depends(oauth2_
         raise
 
     return user.email
+
+
+@router.get("/admin")
+def get_admin_template(request: Request):
+    return templates.TemplateResponse('index.html', {"request": request})
+
+
+@router.get("/login_page")
+def get_admin_page(request: Request):
+    return templates.TemplateResponse('login.html', {"request": request})
+
+
+@router.get("/admin_page")
+def get_admin_page(request: Request, token: str = Depends(oauth2_scheme)):
+    p_layer_schemas = Path('BLL/layer_schemas')
+    layer_schemas = {}
+    for p_schema in p_layer_schemas.glob("*.json"):
+        schema = json.load(open(p_schema))
+        layer_schemas[p_schema.stem] = schema
+
+    return templates.TemplateResponse('admin.html', {"request": request, "layer_schemas": layer_schemas})
 
 
 @router.post("/create", response_model=schemas.User)

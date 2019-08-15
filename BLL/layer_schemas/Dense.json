@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string"
+    },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "params": {
+      "type": "object",
+      "properties": {
+        "input_shape": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "units": {
+            "type": "integer"
+          },
+          "kernel_regularizer": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "l1": {
+                "type": "number"
+              },
+              "l2": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "type",
+              "l1",
+              "l2"
+            ]
+          }
+        }
+      }
+    },
+    "required": [
+      "name",
+      "type",
+      "inputs",
+      "params"
+    ]
+  }
+}

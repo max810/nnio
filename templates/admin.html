@@ -1,0 +1,36 @@
+LAYERS SPECIFICATION
+<div class="container">
+    <div class="row">
+        <div class="col-4">
+            <div class="list-group" id="list-tab" role="tablist">
+                {% for l_type, layer_schema in layer_schemas.items() %}
+                    {% set l_type_lower = l_type | lower %}
+                    <a class="list-group-item list-group-item-action" id="list-{{ l_type_lower }}-list"
+                       data-toggle="list"
+                       href="#list-{{ l_type_lower }}" role="tab" aria-controls="{{ l_type_lower }}">{{ l_type }}</a>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="col-8">
+            <div class="tab-content" id="nav-tabContent">
+                {% for l_type, layer_schema in layer_schemas.items() %}
+                    {% set l_type_lower = l_type | lower %}
+                    <div class="tab-pane fade show" id="list-{{ l_type_lower }}" role="tabpanel"
+                         aria-labelledby="list-{{ l_type_lower }}-list">
+                        {{ layer_schema.properties.keys() }}
+                        {#      TODO - add content (fields, types, "edit" buttons), etc.        #}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+<!--
+TODO
+    Generate this: https://getbootstrap.com/docs/4.0/components/list-group/#javascript-behavior
+    For every layer With Jinja
+-->
+
+<script>
+    //# sourceURL=login.js
+</script>
