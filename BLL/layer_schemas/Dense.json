@@ -45,7 +45,10 @@
             "l2"
           ]
         }
-      }
+      },
+      "required": [
+        "input_shape"
+      ]
     },
     "required": [
       "name",

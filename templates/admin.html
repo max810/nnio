@@ -1,4 +1,5 @@
 LAYERS SPECIFICATION
+{% set json_types = ['string', 'integer', 'number', 'array', 'boolean', 'object'] %}
 <div class="container">
     <div class="row">
         <div class="col-4">
@@ -14,14 +15,46 @@ LAYERS SPECIFICATION
         <div class="col-8">
             <div class="tab-content" id="nav-tabContent">
                 {% for l_type, layer_schema in layer_schemas.items() %}
-                    {% set props = layer_schema.params.properties %}
+                    {% set params = layer_schema.properties.params %}
+                    {% set props = params.properties %}
+                    {% set params_required = params.get('required', []) %}
                     {# TODO: add additional constraints: https://getbootstrap.com/docs/4.3/components/collapse/#example  #}
                     {# TODO filter like this https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_js_dropdown_filter #}
 
                     {% set l_type_lower = l_type | lower %}
                     <div class="tab-pane fade show" id="list-{{ l_type_lower }}" role="tabpanel"
                          aria-labelledby="list-{{ l_type_lower }}-list">
-                        {{ layer_schema.properties.keys() }}
+                        PARAMETERS
+                        <table class="table">
+                            {% for prop_name, prop_val in props.items() %}
+                                <tr>
+                                    <td>
+                                        <label for="{{ prop_name }}-type-select">
+                                            {{ prop_name }}
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <div class="form-check form-check-inline">
+                                            <select id="{{ prop_name }}-type-select"
+                                                    class="selectpicker form-check-input">
+                                                {% for dt in json_types %}
+                                                    <option {% if dt == prop_val.type %}
+                                                        {{ "selected=\"selected\"" }}{% endif %}
+                                                    >{{ dt[0] | upper }}{{ dt[1:] }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <label class="form-check-label">
+                                                <input
+                                                        type="checkbox"
+                                                        {{ "checked" if prop_name in params_required }}>
+                                                Required
+                                            </label>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                        {#                        {{ layer_schema['properties'].keys() }}#}
                         {#      TODO - add content (fields, types, "edit" buttons), etc.        #}
                     </div>
                 {% endfor %}
