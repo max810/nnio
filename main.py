@@ -31,7 +31,7 @@ app.include_router(
     tags=['User authentication and authorization']
 )
 
-SQLALCHEMY_DATABASE_URL = os.environ['DATABASE_URL ']
+SQLALCHEMY_DATABASE_URL = os.environ['DATABASE_URL']
 # SQLALCHEMY_DATABASE_URL = "postgres+psycopg2://{}:{}@localhost:5432/nnio".format(
 #     os.environ['NNIO_DB_USERNAME'],
 #     os.environ['NNIO_DB_PASSWORD'],
