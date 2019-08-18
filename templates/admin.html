@@ -14,6 +14,10 @@ LAYERS SPECIFICATION
         <div class="col-8">
             <div class="tab-content" id="nav-tabContent">
                 {% for l_type, layer_schema in layer_schemas.items() %}
+                    {% set props = layer_schema.params.properties %}
+                    {# TODO: add additional constraints: https://getbootstrap.com/docs/4.3/components/collapse/#example  #}
+                    {# TODO filter like this https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_js_dropdown_filter #}
+
                     {% set l_type_lower = l_type | lower %}
                     <div class="tab-pane fade show" id="list-{{ l_type_lower }}" role="tabpanel"
                          aria-labelledby="list-{{ l_type_lower }}-list">
@@ -29,6 +33,7 @@ LAYERS SPECIFICATION
 TODO
     Generate this: https://getbootstrap.com/docs/4.0/components/list-group/#javascript-behavior
     For every layer With Jinja
+    USE SQLCipher for SQLite db file
 -->
 
 <script>

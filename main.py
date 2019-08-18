@@ -1,4 +1,5 @@
 import logging
+import os
 
 from starlette.requests import Request
 from starlette.responses import Response
@@ -30,10 +31,14 @@ app.include_router(
     tags=['User authentication and authorization']
 )
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./storage.db"
+SQLALCHEMY_DATABASE_URL = os.environ['DATABASE_URL ']
+# SQLALCHEMY_DATABASE_URL = "postgres+psycopg2://{}:{}@localhost:5432/nnio".format(
+#     os.environ['NNIO_DB_USERNAME'],
+#     os.environ['NNIO_DB_PASSWORD'],
+# )
 
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+    SQLALCHEMY_DATABASE_URL
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 DAL.models.Base.metadata.create_all(bind=engine)

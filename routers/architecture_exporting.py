@@ -4,7 +4,7 @@ from http import HTTPStatus
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse
 
-from fastapi import HTTPException, File, APIRouter
+from fastapi import HTTPException, File, APIRouter, Query
 from pydantic import ValidationError
 
 from BLL.exporting.model_exporting import KNOWN_FRAMEWORKS, export_model
@@ -55,8 +55,10 @@ async def export_from_json_body(framework: str,
     line_break_str = line_breaks[line_break]
     indent_str = indents[indent]
 
-    framework_specific_params = dict(request.query_params)
-    del framework_specific_params['framework']
+    # framework_specific_params = dict(request.query_params)
+    for p in ['framework', 'line_break', 'indent']:
+        if p in framework_specific_params:
+            del framework_specific_params[p]
 
     try:
         source_code = export_model(net_model, framework, line_break_str, indent_str, **framework_specific_params)
