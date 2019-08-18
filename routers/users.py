@@ -11,7 +11,7 @@ from fastapi import Depends, FastAPI, HTTPException, APIRouter
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jwt import PyJWTError
 from pydantic import BaseModel
-from starlette.status import HTTP_401_UNAUTHORIZED
+import starlette.status as status
 
 from DAL import schemas, users_repository, models
 from routers.common import SECRET_KEY, ALGORITHM, oauth2_scheme, ACCESS_TOKEN_EXPIRE_MINUTES, templates
@@ -58,7 +58,7 @@ def create_access_token(*, data: dict, expires_delta: timedelta = None):
 
 async def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
-        status_code=HTTP_401_UNAUTHORIZED,
+        status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
@@ -86,7 +86,7 @@ async def login_for_access_token(db: Session = Depends(get_db), form_data: OAuth
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
-            status_code=HTTP_401_UNAUTHORIZED,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
@@ -134,6 +134,6 @@ def get_admin_page(request: Request, token: str = Depends(oauth2_scheme)):
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = users_repository.get_user_by_email(db, email=user.email)
     if db_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
 
     return users_repository.create_user(db=db, user=user)

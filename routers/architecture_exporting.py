@@ -1,14 +1,14 @@
 import json
 import logging
 import enum
-from http import HTTPStatus
+import starlette.status as status
 from starlette.responses import PlainTextResponse
 
 from fastapi import HTTPException, File, APIRouter, Query
 from pydantic import ValidationError
 
 from BLL.exporting.model_exporting import KNOWN_FRAMEWORKS, export_model
-from models import ArchitectureDataModel, NetworkModel, line_breaks, indents, FrameworkError
+from models import ArchitectureDataModel, NetworkModel, line_breaks, indents, FrameworkError, LayerTypes
 
 router = APIRouter()
 
@@ -31,7 +31,7 @@ async def export_from_json_file(framework: Frameworks,
         architecture_dict = json.loads(architecture_file)
         model = ArchitectureDataModel(**architecture_dict)
     except ValidationError as e:
-        raise HTTPException(HTTPStatus.UNPROCESSABLE_ENTITY, "Invalid architecture file:\n{}".format(e))
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Invalid architecture file:\n{}".format(e))
 
     return await export_from_json_body(framework, model, line_break, indent,
                                        keras_prefer_sequential=keras_prefer_sequential)
@@ -56,9 +56,7 @@ async def export_from_json_body(framework: Frameworks,
     logging.info(model.id)
     logging.info(model.date_created)
 
-    if len(model.layers) == 0:
-        raise HTTPException(HTTPStatus.UNPROCESSABLE_ENTITY, "Model should have at least 1 layer.")
-
+    validate_model(model)
     net_model = NetworkModel.from_data_model(model)
 
     line_break_str = line_breaks[line_break]
@@ -72,12 +70,20 @@ async def export_from_json_body(framework: Frameworks,
         source_code = export_model(net_model, framework, line_break_str, indent_str, **framework_specific_params)
         return PlainTextResponse(source_code)
     except FrameworkError as e:
-        raise HTTPException(HTTPStatus.BAD_REQUEST, str(e))
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, str(e))
+
+
+def validate_model(model: ArchitectureDataModel):
+    if len(model.layers) < 1 or not any(l.type == LayerTypes.Input and len(l.inputs) == 0 for l in model.layers):
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            "Model must have at least 2 layers one of which is Input layer with empty `inputs` property."
+        )
 
 
 def validate_member_in(member, collection, member_name):
     if member not in collection:
-        raise HTTPException(HTTPStatus.BAD_REQUEST,
+        raise HTTPException(status.HTTP_400_BAD_REQUEST,
                             f"Unknown {member_name} {member}, known {member_name}s are: {collection}")
 
 
