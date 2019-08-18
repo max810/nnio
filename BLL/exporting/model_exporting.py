@@ -1,6 +1,6 @@
 from BLL.exporting.keras_generators import KerasSequentialGenerator, KerasFunctionalGenerator
 from .python_code_generator import PythonCodeGenerator
-from models import NetworkModel
+from models import NetworkModel, FrameworkError
 
 
 def export_model(model: NetworkModel, framework: str, line_break: str, indent: str, **kwargs):
@@ -12,13 +12,18 @@ def export_model(model: NetworkModel, framework: str, line_break: str, indent: s
 
 
 def export_keras(model: NetworkModel, cg: PythonCodeGenerator, **kwargs):
-    use_sequential_arg = str(kwargs.get('use-sequential', False))
+    use_sequential_arg = str(kwargs.get('keras_prefer_sequential', False))
     use_sequential = use_sequential_arg.lower() in ['true', 't', '1', 'y', 'yes']
 
     if use_sequential:
-        gen = KerasSequentialGenerator(model, cg)
-    else:
-        gen = KerasFunctionalGenerator(model, cg)
+        try:
+            gen = KerasSequentialGenerator(model, cg)
+            return gen.generate_code()
+        except FrameworkError:
+            # if the model is not Sequential, we will switch to Functional Api instead
+            pass
+
+    gen = KerasFunctionalGenerator(model, cg)
 
     return gen.generate_code()
 

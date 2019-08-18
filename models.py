@@ -6,9 +6,9 @@ from pydantic import BaseModel
 
 indents = {
     'tabs': "\t",
-    "2_spaces": " " * 2,
-    "4_spaces": " " * 4,
-    "8_spaces": " " * 8,
+    "spaces_2": " " * 2,
+    "spaces_4": " " * 4,
+    "spaces_8": " " * 8,
 }
 
 line_breaks = {

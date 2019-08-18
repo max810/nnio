@@ -1,7 +1,7 @@
 import json
 import logging
+import enum
 from http import HTTPStatus
-from starlette.requests import Request
 from starlette.responses import PlainTextResponse
 
 from fastapi import HTTPException, File, APIRouter, Query
@@ -12,13 +12,17 @@ from models import ArchitectureDataModel, NetworkModel, line_breaks, indents, Fr
 
 router = APIRouter()
 
+Frameworks = enum.Enum('Frameworks', zip(KNOWN_FRAMEWORKS, KNOWN_FRAMEWORKS))
+LineBreaks = enum.Enum('LineBreaks', zip(line_breaks.keys(), line_breaks.keys()))
+Indents = enum.Enum('Indents', zip(indents.keys(), indents.keys()))
+
 
 @router.post("/export-from-json-file")
-async def export_from_json_file(framework: str,
-                                request: Request,
+async def export_from_json_file(framework: Frameworks,
                                 architecture_file: bytes = File(..., alias='architecture-file'),
-                                line_break: str = "lf",
-                                indent: str = "4_spaces"):
+                                line_break: LineBreaks = LineBreaks.lf,
+                                indent: Indents = Indents.spaces_4,
+                                keras_prefer_sequential: bool = False):
     """
     Example request file: https://jsoneditoronline.org/?id=24ce7b7c485c42f7bec3c27a4f437afd
     """
@@ -29,42 +33,46 @@ async def export_from_json_file(framework: str,
     except ValidationError as e:
         raise HTTPException(HTTPStatus.UNPROCESSABLE_ENTITY, "Invalid architecture file:\n{}".format(e))
 
-    return await export_from_json_body(framework, request, model, line_break, indent)
+    return await export_from_json_body(framework, model, line_break, indent,
+                                       keras_prefer_sequential=keras_prefer_sequential)
 
 
 @router.post("/export-from-json-body")
-async def export_from_json_body(framework: str,
-                                request: Request,
+async def export_from_json_body(framework: Frameworks,
                                 model: ArchitectureDataModel,
-                                line_break: str = "lf",
-                                indent: str = "4_spaces"):
-    framework = framework.lower()
-    validate_member_in(framework, KNOWN_FRAMEWORKS, "framework")
+                                line_break: LineBreaks = LineBreaks.lf,
+                                indent: Indents = Indents.spaces_4,
+                                keras_prefer_sequential: bool = False):
+    framework = framework.value.lower()
+    # validate_member_in(framework, KNOWN_FRAMEWORKS, "framework")
 
-    line_break = line_break.lower()
-    validate_member_in(line_break, line_breaks, "line_break")
+    line_break = line_break.value.lower()
+    # validate_member_in(line_break, line_breaks, "line_break")
 
-    indent = indent.lower()
-    validate_member_in(indent, indents, "indent")
+    indent = indent.value.lower()
+    # validate_member_in(indent, indents, "indent")
 
     logging.info(framework)
     logging.info(model.id)
     logging.info(model.date_created)
+
+    if len(model.layers) == 0:
+        raise HTTPException(HTTPStatus.UNPROCESSABLE_ENTITY, "Model should have at least 1 layer.")
+
     net_model = NetworkModel.from_data_model(model)
 
     line_break_str = line_breaks[line_break]
     indent_str = indents[indent]
 
-    # framework_specific_params = dict(request.query_params)
-    for p in ['framework', 'line_break', 'indent']:
-        if p in framework_specific_params:
-            del framework_specific_params[p]
+    framework_specific_params = dict(
+        keras_prefer_sequential=keras_prefer_sequential
+    )
 
     try:
         source_code = export_model(net_model, framework, line_break_str, indent_str, **framework_specific_params)
         return PlainTextResponse(source_code)
     except FrameworkError as e:
-        return HTTPException(HTTPStatus.BAD_REQUEST, str(e))
+        raise HTTPException(HTTPStatus.BAD_REQUEST, str(e))
 
 
 def validate_member_in(member, collection, member_name):
