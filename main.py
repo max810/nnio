@@ -61,7 +61,7 @@ if __name__ == "__main__":
     logging.info("About to create a user")
     user = sess.query(models.User).filter(models.User.email == 'admin@gmail.com').first()
     if not user:
-        user = models.User(email='admin@gmail.com', hashed_password='test_password')
+        user = models.User(email='admin@gmail.com', hashed_password=os.environ['DB_ADMIN_DEFAULT_PASSWORD'])
         sess.add(user)
         sess.commit()
         sess.refresh(user)
