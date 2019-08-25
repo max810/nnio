@@ -12,6 +12,13 @@ from DAL import models
 from routers import architecture_exporting, users
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
+from starlette.middleware.cors import CORSMiddleware
+
+origins = [
+    # "http://localhost:8080",
+    # "https://localhost:*",
+    "*://localhost:*/*",
+]
 
 logging.basicConfig(
     level=logging.INFO,
@@ -19,6 +26,15 @@ logging.basicConfig(
 )
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    # allow_origins=origins,
+    allow_origin_regex=".*://localhost:.*",
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(
     architecture_exporting.router,
     prefix='/architecture',
@@ -46,7 +62,7 @@ DAL.models.Base.metadata.create_all(bind=engine)
 
 @app.middleware("http")
 async def db_session_middleware(request: Request, call_next):
-    response = Response("Internal server error", status_code=500)
+    response = Response("Internal server error_message", status_code=500)
     try:
         request.state.db = SessionLocal()
         response = await call_next(request)
@@ -58,6 +74,7 @@ async def db_session_middleware(request: Request, call_next):
 
 if __name__ == "__main__":
     sess: Session = SessionLocal()
+
     logging.info("About to create a user")
     user = sess.query(models.User).filter(models.User.email == 'admin@gmail.com').first()
     if not user:

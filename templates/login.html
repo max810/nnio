@@ -43,10 +43,10 @@
                 localStorage.setItem('jwt', jwt);
                 window.location.href = '/user/admin';
             },
-            'error': function (jqXHR, textStatus, errorThrown) {
+            'error_message': function (jqXHR, textStatus, errorThrown) {
                 console.log(textStatus);
                 console.log(errorThrown);
-                $('#login-error').css('visibility', 'visible');
+                $('#login-error_message').css('visibility', 'visible');
             }
         })
     })
