@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import Router, { Location } from 'vue-router';
+import Router, {Location} from 'vue-router';
 import Login from '@/views/Login.vue';
 import Admin from '@/views/Admin.vue';
 
@@ -19,7 +19,7 @@ export default new Router({
 
         return next({
           name: 'login',
-          params: { 'msg': 'LOGIN FIRST MOTHERFUCKER!' }
+          params: {msg: 'LOGIN FIRST MOTHERFUCKER!'}
         });
       },
     },

@@ -45,7 +45,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
 import axios from "axios";
-import { backendUrl } from "@/constants";
+import { backendUrls } from "@/constants";
 
 @Component({})
 export default class Login extends Vue {
@@ -68,7 +68,7 @@ export default class Login extends Vue {
     bodyFormData.append("password", this.password);
 
     axios
-      .post(backendUrl + "/user/login", bodyFormData)
+      .post(backendUrls.login, bodyFormData)
       .then(async response => {
         console.log(`LOGIN STATUS: ${response.status}, ${response.statusText}`);
         const data = response.data;
@@ -76,6 +76,7 @@ export default class Login extends Vue {
           typeof data == "string"
             ? JSON.parse(data)["access_token"]
             : data["access_token"];
+
         localStorage.setItem("jwt", jwt);
         await this.$router.push({ name: "admin" });
       })

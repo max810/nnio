@@ -3,16 +3,26 @@ import App from './App.vue';
 import router from './router';
 import axios from 'axios';
 import BootstrapVue from 'bootstrap-vue';
+import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 
+Vue.filter('capitalize', function (value: any) {
+  if (!value) return '';
+  value = value.toString();
+  return value.charAt(0).toUpperCase() + value.slice(1);
+});
 // Vue.config.productionTip = false;
 Vue.use(BootstrapVue);
 
-new Vue({
+let vm = new Vue({
   router,
   render: (h) => h(App),
 }).$mount('#app');
+
+(<any>window).vm = vm;
+
+console.log(vm);
 
 axios.interceptors.request.use(request => {
   const jwt = localStorage.getItem('jwt');
