@@ -2,11 +2,7 @@
   <div>
     {{ param.name }} constraints
     <atomic-constraints v-if="param.type !== 'object'" v-bind:param="param"></atomic-constraints>
-    <table v-else class="table">
-      <tr>
-        <td>TODO ;;;))) (add params-list)</td>
-      </tr>
-    </table>
+    <params-list v-else v-bind:params="param.additionalConstraints" v-bind:baseId="baseId"></params-list>
   </div>
 </template>
 
@@ -14,12 +10,14 @@
   import {Component, Prop, Vue} from 'vue-property-decorator';
   import LayerParam from '@/classes/LayerParam';
   import AtomicConstraints from '@/components/AtomicConstraints.vue';
+  import ParamsList from '@/components/ParamsList.vue';
 
   @Component({
-    components: {AtomicConstraints}
+    components: {ParamsList, AtomicConstraints}
   })
   export default class Constraints extends Vue {
     @Prop(LayerParam) param: LayerParam | undefined;
+    @Prop(String) baseId: string | undefined;
     name = "constraints";
   }
 

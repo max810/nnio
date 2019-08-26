@@ -17,16 +17,6 @@ export default class LayerParam {
     }
   }
 
-  //
-  // generateConstraintsTemplates() {
-  //   // TODO
-  //   switch (this.type) {
-  //     case "array":
-  //       return `<input type="number" v-model="this.">`;
-  //     default:
-  //       throw new Error(`Invalid type ${this.type}!`);
-  //   }
-  // }
   static readonly defaultConstraints: Dictionary<object> = {
     number:
       {

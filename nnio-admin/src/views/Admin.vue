@@ -1,4 +1,4 @@
-<template xmlns:v-model="http://www.w3.org/1999/xhtml">
+<template>
   <div class="container">
     <div class="row">
       <div class="col-2">
@@ -17,9 +17,6 @@
       </div>
       <div class="col-10">
         <div class="tab-content" id="nav-tabContent">
-          <!--TODO: add additional constraints: https://getbootstrap.com/docs/4.3/components/collapse/#example
-          TODO filter like this https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_js_dropdown_filter-->
-
           <div
               v-for="lSchema of layerSchemas"
               class="tab-pane fade show"
@@ -36,7 +33,20 @@
     </div>
   </div>
 </template>
+<!--
+TODO:
+  Add constraints for array elements (like object),
+  add `add` and `delete` functionality for properties and constraints,
+  add `oneOf` (enum) functionality to constraints
+  add `save` functionality
+ -->
+<div>
 
+</div>
+<!--
+FIXME:
+  fix undefined in baseId
+-->
 <script lang="ts">
   import VRuntimeTemplate from "v-runtime-template";
   import {Component, Vue} from "vue-property-decorator";
@@ -53,7 +63,6 @@
   })
   export default class Admin extends Vue {
     layerSchemas: LayerSchema[] = [];
-    testMsg: string = "1234";
     JSONTypes = JSONTypes;
 
     static parseLayersSchemas(json: string | object) {
@@ -88,42 +97,42 @@
       let paramValue_ = pValue as any;
       const name_ = pName;
       const type_ = paramValue_["type"];
-      delete paramValue_["type"];
       const required_ = requiredParams.includes(name_);
-      const constraints_ = Admin.parseConstraints(paramValue_, type_);
+      const constraints_ = Admin.parseConstraints(paramValue_);
 
       return new LayerParam(name_, type_, required_, constraints_);
     }
 
-
-    static parseConstraints(prop: any, type_: string) {
+    static parseConstraints(prop: any, type_: string = prop.type) {
+      console.log(`PARSING`);
+      console.log(prop);
       switch (type_) {
         case "string":
         case "boolean":
-          // TODO - think about oneOf (enum)
           return LayerParam.defaultConstraints[type_];
         case "number":
         case "integer":
           return {
-            maximum: prop.maximum || null,
-            minimum: prop.minimum || null,
+            maximum: typeof prop.maximum === "undefined" ? null : prop.maximum,
+            minimum: typeof prop.minimum === "undefined" ? null : prop.minimum,
           };
         case "array":
           const items = prop.items || {};
           // items will NEVER be Array, only object
           return {
-            maxItems: items.maxItems || null,
-            minItems: items.minItems || null,
-            itemsType: items.type || null,
+            maxItems: typeof items.maxItems === "undefined" ? null : items.maxItems,
+            minItems: typeof items.minItems === "undefined" ? null : items.minItems,
+            itemsType: typeof items.type === "undefined" ? null : items.type,
           };
         case "object":
-          return {};
-        // TODO
-        // const propParams: LayerParam[] = [];
-        // for (const [pName, pValue] of Object.entries(prop.properties)) {
-        //   const pp = Admin.parseLayerParam(pName, pValue as any, prop.required || []);
-        //   propParams.push(pp);
-        // }
+          console.log("OBJECT");
+          let res: any = [];
+          for (const k of Object.keys(prop.properties)) {
+            const localProp = prop.properties[k];
+            res.push(this.parseLayerParam(k, localProp, prop.required));
+          }
+          (window as any).RES = res;
+          return res;
       }
     }
 

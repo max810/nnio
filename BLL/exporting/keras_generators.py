@@ -9,7 +9,7 @@ from models import NetworkModel, FrameworkError, LayerTypes
 
 class KerasGenerator(FrameworkCodeGenerator, ABC):
     def _parse_regularizer(self, regularizer_params: dict):
-        l_type = regularizer_params['type']
+        l_type = regularizer_params['regularization_type']
         if l_type == 'l1' or l_type == 'l2':
             return self.cg.call(l_type, regularizer_params['l'], )
         else:

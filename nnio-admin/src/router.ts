@@ -19,7 +19,7 @@ export default new Router({
 
         return next({
           name: 'login',
-          params: {msg: 'LOGIN FIRST MOTHERFUCKER!'}
+          params: {msg: 'YOU NEED TO LOGIN FIRST!'}
         });
       },
     },

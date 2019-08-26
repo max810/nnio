@@ -29,18 +29,20 @@
         "kernel_regularizer": {
           "type": "object",
           "properties": {
-            "type": {
+            "regularization_type": {
               "type": "string"
             },
             "l1": {
-              "type": "number"
+              "type": "number",
+              "minimum": 0.0
             },
             "l2": {
-              "type": "number"
+              "type": "number",
+              "minimum": 0.0
             }
           },
           "required": [
-            "type",
+            "regularization_type",
             "l1",
             "l2"
           ]

@@ -25,7 +25,7 @@
           <a
               class
               data-toggle="collapse"
-              v-bind:href="`#${collapseBaseId}-${param.name}-additional-constraints`"
+              v-bind:href="`#${baseId}-${param.name}-additional-constraints`"
               role="button"
               aria-expanded="false"
               aria-controls="collapseExample">
@@ -33,12 +33,12 @@
           </a>
           <div
               class="collapse"
-              v-bind:id="`${collapseBaseId}-${param.name}-additional-constraints`">
+              v-bind:id="`${baseId}-${param.name}-additional-constraints`">
             <div class="card card-body">
               <!--TODO: when changed param type, DO NOT DELETE previous type's constraints.
                     Instead during saving just `switch` over type and take needed constraints
                   -->
-              <constraints v-bind:param="param"></constraints>
+              <constraints v-bind:param="param" v-bind:baseId="baseId"></constraints>
             </div>
           </div>
         </div>
@@ -50,17 +50,25 @@
 <script lang="ts">
   import {Component, Prop, Vue} from 'vue-property-decorator';
   import LayerParam from '@/classes/LayerParam';
-  import Constraints from '@/components/Constraints.vue';
+  // import Constraints from '@/components/Constraints.vue';
   import {JSONTypes} from "@/constants";
 
   @Component({
-    components: {Constraints}
+    // components: {Constraints}
   })
   export default class ParamsList extends Vue {
     @Prop(Array) params: LayerParam[] | undefined;
-    @Prop(String) collapseBaseId: string | undefined;
+    @Prop(String) baseId: string | undefined;
     JSONTypes = JSONTypes;
     name = "params-list";
+
+    beforeCreate() {
+      if (this.$options.components) {
+        this.$options.components.Constraints = require("@/components/Constraints").default;
+      } else {
+        console.log("FAILED FAILED FAILED IMPORT CONSTRAINTS");
+      }
+    }
   }
 
 </script>

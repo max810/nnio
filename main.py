@@ -14,6 +14,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from starlette.middleware.cors import CORSMiddleware
 
+# TODO - check if works on deploy
 origins = [
     # "http://localhost:8080",
     # "https://localhost:*",

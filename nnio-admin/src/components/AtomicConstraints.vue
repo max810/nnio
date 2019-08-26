@@ -2,7 +2,7 @@
   <div>
     <table class="table atomic" v-if="['number', 'integer'].includes(param.type)">
       <tr>
-        <td class="col">
+        <td>
           <input type="number" v-model.number="param.additionalConstraints.minimum">
         </td>
         <td style="min-width: 150px; text-align: center">
