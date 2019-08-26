@@ -1,7 +1,7 @@
 <template xmlns:v-model="http://www.w3.org/1999/xhtml">
   <div class="container">
     <div class="row">
-      <div class="col-4">
+      <div class="col-2">
         <div class="list-group" id="list-tab" role="tablist">
           <a
               v-for="lSchema of layerSchemas"
@@ -15,66 +15,21 @@
           >{{ lSchema.layerType }}</a>
         </div>
       </div>
-      <div class="col-8">
+      <div class="col-10">
         <div class="tab-content" id="nav-tabContent">
           <!--TODO: add additional constraints: https://getbootstrap.com/docs/4.3/components/collapse/#example
           TODO filter like this https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_js_dropdown_filter-->
 
           <div
               v-for="lSchema of layerSchemas"
-              v-bind:key="lSchema.layerType"
               class="tab-pane fade show"
               v-bind:id="`list-${lSchema.layerType}`"
               role="tabpanel"
               v-bind:aria-labelledby="`list-${lSchema.layerType}-list`"
           >
-            PARAMETERS
-            <table class="table">
-              <tr v-for="prop of lSchema.layerParams"
-                  v-bind:key="prop.name">
-                <td>
-                  <label v-bind:for="`${lSchema.layerType}-${prop.name}-type-select`">
-                    <input type="text"
-                           v-model:value="prop.name">
-                  </label>
-                </td>
-                <td>
-                  <div class="form-check form-check-inline">
-                    <select v-model="prop.type"
-                            v-bind:id="`${lSchema.layerType }-${prop.name}-type-select`"
-                            class="selectpicker form-check-input">
-                      <option v-for="t of jsonTypes">
-                        {{ t }}
-                      </option>
-                    </select>
-                    <label class="form-check-label">
-                      <input type="checkbox" v-model="prop.required">
-                      Required
-                    </label>
-                  </div>
-                  <div>
-                    <a
-                        class
-                        data-toggle="collapse"
-                        v-bind:href="`#${lSchema.layerType}-${prop.name}-additional-constraints`"
-                        role="button"
-                        aria-expanded="false"
-                        aria-controls="collapseExample">
-                      Additional constraints
-                    </a>
-                    <div
-                        class="collapse"
-                        v-bind:id="`${lSchema.layerType}-${prop.name}-additional-constraints`">
-                      <div class="card card-body">TODO ;)
-                        <div>{{ }}</div>
-                      </div>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            </table>
-            <!--            {# {{ layer_schema['properties'].keys() }}#}-->
-            <!--            {# TODO - add content (fields, types, "edit" buttons), etc. #}-->
+            <!--        for div ^      v-bind:key="lSchema.layerType"-->
+            <params-list v-bind:params="lSchema.layerParams" v-bind:collapseBaseId="lSchema.layerType">
+            </params-list>
           </div>
         </div>
       </div>
@@ -83,15 +38,23 @@
 </template>
 
 <script lang="ts">
+  import VRuntimeTemplate from "v-runtime-template";
   import {Component, Vue} from "vue-property-decorator";
   import {Dictionary} from "vue-router/types/router";
   import Axios from "axios";
-  import {backendUrls} from "@/constants";
+  import {backendUrls, JSONTypes} from "@/constants";
+  import LayerSchema from '@/classes/LayerSchema';
+  import LayerParam from '@/classes/LayerParam';
+  import Constraints from '@/components/Constraints.vue';
+  import ParamsList from '@/components/ParamsList.vue';
 
-  @Component({})
+  @Component({
+    components: {ParamsList, Constraints, VRuntimeTemplate}
+  })
   export default class Admin extends Vue {
     layerSchemas: LayerSchema[] = [];
-    jsonTypes = ['string', 'integer', 'number', 'array', 'boolean', 'object'];
+    testMsg: string = "1234";
+    JSONTypes = JSONTypes;
 
     static parseLayersSchemas(json: string | object) {
       let data: Dictionary<any>;
@@ -138,7 +101,7 @@
         case "string":
         case "boolean":
           // TODO - think about oneOf (enum)
-          return LayerParam.getDefaultConstraints(type_);
+          return LayerParam.defaultConstraints[type_];
         case "number":
         case "integer":
           return {
@@ -146,7 +109,7 @@
             minimum: prop.minimum || null,
           };
         case "array":
-          const items = prop.items;
+          const items = prop.items || {};
           // items will NEVER be Array, only object
           return {
             maxItems: items.maxItems || null,
@@ -154,6 +117,7 @@
             itemsType: items.type || null,
           };
         case "object":
+          return {};
         // TODO
         // const propParams: LayerParam[] = [];
         // for (const [pName, pValue] of Object.entries(prop.properties)) {
@@ -167,65 +131,23 @@
       console.log("MOUNTED!");
       Axios
         .get(backendUrls.getLayersSchemas)
-        .then(response => {
-          console.log(response);
-          this.layerSchemas = Admin.parseLayersSchemas(response.data);
-        });
+        .then(
+          response => {
+            console.log(response);
+            this.layerSchemas = Admin.parseLayersSchemas(response.data);
+          },
+          err => {
+            if (err.status == 401) {
+              this.$router.push({name: 'login', params: {msg: 'LOGIN EXPIRED'}});
+            }
+          });
 
       console.log(this.layerSchemas);
     }
   }
 
-  class LayerParam {
-    constructor(public name: string,
-                public type: string,
-                public required: boolean,
-                public additionalConstraints: any = {}) {
-      if (!additionalConstraints) {
-        this.additionalConstraints = LayerParam.getDefaultConstraints(this.type);
-      }
-    }
-
-    //
-    // generateConstraintsTemplates() {
-    //   // TODO
-    //   switch (this.type) {
-    //     case "array":
-    //       return `<input type="number" v-model="this.">`;
-    //     default:
-    //       throw new Error(`Invalid type ${this.type}!`);
-    //   }
-    // }
-
-    static getDefaultConstraints(type_: string) {
-      //TODO : think about oneOf (enum)
-      switch (type_) {
-        case "number":
-        case "integer":
-          return {
-            maximum: null,
-            minimum: null,
-          };
-        case "array":
-          return {
-            minItems: null,
-            maxItems: null,
-            itemsType: null,
-          };
-        case "boolean":
-        case "string":
-        case "object":
-        default:
-          return {};
-      }
-    }
-  }
-
-  class LayerSchema {
-    constructor(public layerType: string, public layerParams: LayerParam[]) {
-    }
-  }
 </script>
 
-<style scoped>
+<style>
+
 </style>

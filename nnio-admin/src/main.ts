@@ -7,6 +7,13 @@ import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap-vue/dist/bootstrap-vue.css';
 
+axios.interceptors.request.use(request => {
+  const jwt = localStorage.getItem('jwt');
+  if (jwt) {
+    request.headers['Authorization'] = "Bearer " + jwt;
+  }
+  return request;
+});
 Vue.filter('capitalize', function (value: any) {
   if (!value) return '';
   value = value.toString();
@@ -24,11 +31,5 @@ let vm = new Vue({
 
 console.log(vm);
 
-axios.interceptors.request.use(request => {
-  const jwt = localStorage.getItem('jwt');
-  if (jwt) {
-    request.headers['Authorization'] = "Bearer " + jwt;
-  }
-  return request;
-});
+
 

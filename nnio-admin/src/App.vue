@@ -41,4 +41,23 @@
   #nav a.router-link-exact-active {
     color: #42b983;
   }
+
+  input {
+    margin: 0 0.3rem;
+  }
+
+  .table td.fit,
+  .table th.fit {
+    white-space: nowrap;
+    width: 1%;
+  }
+
+  table > tr > td {
+    text-align: left;
+  }
+
+  label {
+    margin: 0.2rem 0;
+  }
+
 </style>

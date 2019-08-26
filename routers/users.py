@@ -121,22 +121,18 @@ def get_admin_page(request: Request):
 
 @router.get("/admin_page")
 def get_admin_page(request: Request, token: str = Depends(oauth2_scheme)):
-    p_layer_schemas = Path('BLL/layer_schemas')
-    layer_schemas = {}
-    for p_schema in p_layer_schemas.glob("*.json"):
-        schema = json.load(open(p_schema))
-        layer_schemas[p_schema.stem] = schema
-
-    return templates.TemplateResponse('admin.html', {"request": request, "layer_schemas": layer_schemas})
+    return templates.TemplateResponse('admin.html',
+                                      {"request": request, "layer_schemas": get_layers_schemas(request, token)})
 
 
 @router.get("/layers_schemas")
-def get_admin_page():
+def get_layers_schemas(token: str = Depends(oauth2_scheme)):
     p_layer_schemas = Path('BLL/layer_schemas')
     layer_schemas = {}
     for p_schema in p_layer_schemas.glob("*.json"):
         schema = json.load(open(p_schema))
         layer_schemas[p_schema.stem] = schema
+
     # TODO - don't deserialize JSON, just combine strings and return
     return layer_schemas
 
