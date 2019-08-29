@@ -34,7 +34,12 @@
             },
             "l1": {
               "type": "number",
-              "minimum": 0.0
+              "enum": [
+                1,
+                2,
+                3,
+                4
+              ]
             },
             "l2": {
               "type": "number",

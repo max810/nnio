@@ -38,7 +38,7 @@
               <!--TODO: when changed param type, DO NOT DELETE previous type's constraints.
                     Instead during saving just `switch` over type and take needed constraints
                   -->
-              <constraints v-bind:param="param" v-bind:baseId="baseId"></constraints>
+              <constraints v-bind:param="param" v-bind:baseId="`constraints-` + baseId.toString()"></constraints>
             </div>
           </div>
         </div>

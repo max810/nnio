@@ -13,10 +13,10 @@
         </td>
       </tr>
     </table>
-    <table class="table" v-if="['string', 'boolean'].includes(param.type)">
+    <table class="table" v-else-if="['string', 'boolean'].includes(param.type)">
 
     </table>
-    <table class="table" v-if="['array'].includes(param.type)">
+    <table class="table" v-else-if="['array'].includes(param.type)">
       <tr>
         <td>
           <input type="number" min="0" v-model.number="param.additionalConstraints.minItems">

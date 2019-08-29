@@ -25,7 +25,7 @@
               v-bind:aria-labelledby="`list-${lSchema.layerType}-list`"
           >
             <!--        for div ^      v-bind:key="lSchema.layerType"-->
-            <params-list v-bind:params="lSchema.layerParams" v-bind:collapseBaseId="lSchema.layerType">
+            <params-list v-bind:params="lSchema.layerParams" v-bind:baseId="lSchema.layerType">
             </params-list>
           </div>
         </div>
@@ -35,18 +35,15 @@
 </template>
 <!--
 TODO:
-  Add constraints for array elements (like object),
-  add `add` and `delete` functionality for properties and constraints,
+  ? Add constraints for array elements (like object),
   add `oneOf` (enum) functionality to constraints
+  add `add` and `delete` functionality for properties and constraints,
   add `save` functionality
+  add `rename layer` functionality
  -->
 <div>
 
 </div>
-<!--
-FIXME:
-  fix undefined in baseId
--->
 <script lang="ts">
   import VRuntimeTemplate from "v-runtime-template";
   import {Component, Vue} from "vue-property-decorator";
@@ -93,14 +90,24 @@ FIXME:
       return results;
     }
 
+    static parseOneOfs(prop: any) {
+      const oneOfs: any[] = prop.enum || [];
+      return oneOfs.map(val => ({value: val}));
+    }
+
     static parseLayerParam(pName: string, pValue: string, requiredParams: string[]) {
       let paramValue_ = pValue as any;
       const name_ = pName;
       const type_ = paramValue_["type"];
       const required_ = requiredParams.includes(name_);
-      const constraints_ = Admin.parseConstraints(paramValue_);
+      const oneOfs = Admin.parseOneOfs(paramValue_);
+      console.log({oneOfs});
+      const constraints_ =
+        (oneOfs && oneOfs.length > 0)
+          ? LayerParam.defaultConstraints[type_]
+          : Admin.parseConstraints(paramValue_);
 
-      return new LayerParam(name_, type_, required_, constraints_);
+      return new LayerParam(name_, type_, required_, constraints_, oneOfs);
     }
 
     static parseConstraints(prop: any, type_: string = prop.type) {
