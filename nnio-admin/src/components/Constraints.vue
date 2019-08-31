@@ -19,11 +19,15 @@
     </table>
     <div v-if="!param.isOneOf">
       <atomic-constraints v-if="param.type !== 'object'" v-bind:param="param"></atomic-constraints>
-      <params-list v-else v-bind:params="param.additionalConstraints" v-bind:baseId="baseId"></params-list>
+      <params-list v-else v-bind:params="param.additionalConstraints.paramsConstraints"
+                   v-bind:baseId="baseId"></params-list>
     </div>
     <div v-else>
       <atomic-one-ofs v-if="param.type !== 'object'" v-bind:param="param"></atomic-one-ofs>
-      <div v-else>TODO oneOf for object ;)</div>
+      <div v-for="item of param.oneOfs" v-else>
+        <params-values-list v-bind:params="item" v-bind:baseId="`oneOfs-` + baseId.toString()"></params-values-list>
+      </div>
+      <!--      <div v-else>TODO oneOf for object ;)</div>-->
       <!--      <atomic-one-ofs v-if="param.type !== 'object'" v-bind:param="param"></atomic-one-ofs>-->
     </div>
   </div>
@@ -33,11 +37,12 @@
   import {Component, Prop, Vue} from 'vue-property-decorator';
   import LayerParam from '@/classes/LayerParam';
   import AtomicConstraints from '@/components/AtomicConstraints.vue';
+  import ParamsValuesList from '@/components/ParamsValuesList.vue';
   import ParamsList from '@/components/ParamsList.vue';
   import AtomicOneOfs from '@/components/AtomicOneOfs.vue';
 
   @Component({
-    components: {AtomicOneOfs, ParamsList, AtomicConstraints}
+    components: {AtomicOneOfs, ParamsValuesList, AtomicConstraints, ParamsList}
   })
   export default class Constraints extends Vue {
     @Prop(LayerParam) param: LayerParam | undefined;

@@ -48,7 +48,7 @@
 <script lang="ts">
   import {Component, Prop, Vue} from 'vue-property-decorator';
   import {JSONTypes} from "@/constants";
-  import LayerParam from '@/classes/LayerParam';
+  import LayerParam from "@/classes/LayerParam";
 
   @Component({})
   export default class AtomicConstraints extends Vue {

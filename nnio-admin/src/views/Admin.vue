@@ -36,7 +36,7 @@
 <!--
 TODO:
   ? Add constraints for array elements (like object),
-  add `oneOf` (enum) functionality to constraints
+  add `oneOf` (enum) functionality to constraints (only for objects left to do)
   add `add` and `delete` functionality for properties and constraints,
   add `save` functionality
   add `rename layer` functionality
@@ -54,6 +54,7 @@ TODO:
   import LayerParam from '@/classes/LayerParam';
   import Constraints from '@/components/Constraints.vue';
   import ParamsList from '@/components/ParamsList.vue';
+  import LayerParamValue from '@/classes/LayerParamValue';
 
   @Component({
     components: {ParamsList, Constraints, VRuntimeTemplate}
@@ -84,24 +85,33 @@ TODO:
 
         results.push(layerSchema);
       }
-
-      console.log({results});
-
+      (<any>window).SCHEMA = results;
       return results;
     }
 
-    static parseOneOfs(prop: any) {
+    static parseOneOfs(prop: any, type: string) {
       const oneOfs: any[] = prop.enum || [];
-      return oneOfs.map(val => ({value: val}));
+      if (type !== 'object') {
+        return oneOfs.map(val => new LayerParamValue("", type, val));
+      } else {
+        const res: LayerParamValue[][] = [];
+        for (const example of oneOfs) {
+          const exampleParams: LayerParamValue[] = [];
+          for (const [pName, pValue] of Object.entries(example)) {
+            exampleParams.push(this.parseLayerParamValues(pValue, pName));
+          }
+          res.push(exampleParams);
+        }
+        return res;
+      }
     }
 
-    static parseLayerParam(pName: string, pValue: string, requiredParams: string[]) {
+    static parseLayerParam(pName: string, pValue: any, requiredParams: string[]) {
       let paramValue_ = pValue as any;
       const name_ = pName;
       const type_ = paramValue_["type"];
       const required_ = requiredParams.includes(name_);
-      const oneOfs = Admin.parseOneOfs(paramValue_);
-      console.log({oneOfs});
+      const oneOfs = Admin.parseOneOfs(paramValue_, type_);
       const constraints_ =
         (oneOfs && oneOfs.length > 0)
           ? LayerParam.defaultConstraints[type_]
@@ -110,9 +120,21 @@ TODO:
       return new LayerParam(name_, type_, required_, constraints_, oneOfs);
     }
 
+    static parseLayerParamValues(prop: any, pName: string) {
+      const pType = Array.isArray(prop) ? "array" : typeof prop;
+      let value = prop;
+      if (pType == 'object') {
+        const res: LayerParamValue[] = [];
+        for (const [pName_1, pValue_1] of Object.entries(prop)) {
+          res.push(this.parseLayerParamValues(pValue_1, pName_1));
+        }
+        value = res;
+      }
+
+      return new LayerParamValue(pName, pType, value);
+    }
+
     static parseConstraints(prop: any, type_: string = prop.type) {
-      console.log(`PARSING`);
-      console.log(prop);
       switch (type_) {
         case "string":
         case "boolean":
@@ -132,13 +154,14 @@ TODO:
             itemsType: typeof items.type === "undefined" ? null : items.type,
           };
         case "object":
-          console.log("OBJECT");
           let res: any = [];
           for (const k of Object.keys(prop.properties)) {
             const localProp = prop.properties[k];
             res.push(this.parseLayerParam(k, localProp, prop.required));
           }
-          (window as any).RES = res;
+
+          res = {'paramsConstraints': res};
+
           return res;
       }
     }

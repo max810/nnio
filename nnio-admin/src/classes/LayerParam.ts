@@ -40,6 +40,6 @@ export default class LayerParam {
       },
     boolean: {},
     string: {},
-    object: [],
+    object: {'paramsConstraints': []},
   };
 }

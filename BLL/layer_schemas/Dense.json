@@ -51,6 +51,19 @@
             "l1",
             "l2"
           ]
+        },
+        "test_prop_obj": {
+          "type": "object",
+          "enum": [
+            {
+              "a": 1,
+              "b": 2
+            },
+            {
+              "a": 4,
+              "b": 8
+            }
+          ]
         }
       },
       "required": [

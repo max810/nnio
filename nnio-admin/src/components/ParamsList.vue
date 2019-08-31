@@ -35,14 +35,14 @@
               class="collapse"
               v-bind:id="`${baseId}-${param.name}-additional-constraints`">
             <div class="card card-body">
-              <!--TODO: when changed param type, DO NOT DELETE previous type's constraints.
-                    Instead during saving just `switch` over type and take needed constraints
-                  -->
               <constraints v-bind:param="param" v-bind:baseId="`constraints-` + baseId.toString()"></constraints>
             </div>
           </div>
         </div>
       </td>
+    </tr>
+    <tr>
+      <td>TODO add</td>
     </tr>
   </table>
 </template>
@@ -50,6 +50,7 @@
 <script lang="ts">
   import {Component, Prop, Vue} from 'vue-property-decorator';
   import LayerParam from '@/classes/LayerParam';
+  // Is required dynamically to avoid cyclical references
   // import Constraints from '@/components/Constraints.vue';
   import {JSONTypes} from "@/constants";
 
