@@ -40,9 +40,16 @@
           </div>
         </div>
       </td>
+      <td>
+        <close-button v-on:click="deleteParam(param)"></close-button>
+      </td>
     </tr>
     <tr>
-      <td>TODO add</td>
+      <td>
+        <button v-on:click="addParam">
+          Add param
+        </button>
+      </td>
     </tr>
   </table>
 </template>
@@ -53,8 +60,11 @@
   // Is required dynamically to avoid cyclical references
   // import Constraints from '@/components/Constraints.vue';
   import {JSONTypes} from "@/constants";
+  import CloseButton from '@/components/CloseButton.vue';
 
   @Component({
+    components: {CloseButton}
+
     // components: {Constraints}
   })
   export default class ParamsList extends Vue {
@@ -62,6 +72,14 @@
     @Prop(String) baseId: string | undefined;
     JSONTypes = JSONTypes;
     name = "params-list";
+
+    deleteParam(param: LayerParam) {
+      this.params!.splice(this.params!.indexOf(param), 1);
+    }
+
+    addParam(event: MouseEvent) {
+      this.params!.push(LayerParam.createDefault());
+    }
 
     beforeCreate() {
       if (this.$options.components) {

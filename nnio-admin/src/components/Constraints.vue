@@ -23,12 +23,12 @@
                    v-bind:baseId="baseId"></params-list>
     </div>
     <div v-else>
-      <atomic-one-ofs v-if="param.type !== 'object'" v-bind:param="param"></atomic-one-ofs>
+      <atomic-one-ofs v-if="param.type !== 'object'" v-bind:items="param.oneOfs"
+                      v-bind:itemsType="param.type"></atomic-one-ofs>
       <div v-for="item of param.oneOfs" v-else>
-        <params-values-list v-bind:params="item" v-bind:baseId="`oneOfs-` + baseId.toString()"></params-values-list>
+        <params-values-list v-bind:params="item" v-bind:baseId="`oneOfs-` + baseId.toString()"
+                            v-bind:withNames="true"></params-values-list>
       </div>
-      <!--      <div v-else>TODO oneOf for object ;)</div>-->
-      <!--      <atomic-one-ofs v-if="param.type !== 'object'" v-bind:param="param"></atomic-one-ofs>-->
     </div>
   </div>
 </template>

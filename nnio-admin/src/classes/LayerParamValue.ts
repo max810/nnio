@@ -6,4 +6,8 @@ export default class LayerParamValue extends NamelessLayerParamValue {
               public value: any) {
     super(type, value);
   }
+
+  static createDefault() {
+    return new LayerParamValue("", "string", "");
+  }
 }

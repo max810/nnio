@@ -35,9 +35,7 @@
 </template>
 <!--
 TODO:
-  ? Add constraints for array elements (like object),
-  add `oneOf` (enum) functionality to constraints (only for objects left to do)
-  add `add` and `delete` functionality for properties and constraints,
+  save ALL constraints (in case person changes type, e.g. make fields activeConstraints and allConstraints[key: JSONType]
   add `save` functionality
   add `rename layer` functionality
  -->
@@ -91,7 +89,7 @@ TODO:
 
     static parseOneOfs(prop: any, type: string) {
       const oneOfs: any[] = prop.enum || [];
-      if (type !== 'object') {
+      if (type !== 'object' && type !== 'array') {
         return oneOfs.map(val => new LayerParamValue("", type, val));
       } else {
         const res: LayerParamValue[][] = [];
@@ -123,7 +121,7 @@ TODO:
     static parseLayerParamValues(prop: any, pName: string) {
       const pType = Array.isArray(prop) ? "array" : typeof prop;
       let value = prop;
-      if (pType == 'object') {
+      if (pType === 'object' || pType === 'array') {
         const res: LayerParamValue[] = [];
         for (const [pName_1, pValue_1] of Object.entries(prop)) {
           res.push(this.parseLayerParamValues(pValue_1, pName_1));
