@@ -19,15 +19,21 @@
     </table>
     <div v-if="!param.isOneOf">
       <atomic-constraints v-if="param.type !== 'object'" v-bind:param="param"></atomic-constraints>
-      <params-list v-else v-bind:params="param.additionalConstraints.paramsConstraints"
+      <params-list v-else v-bind:params="param.activeConstraints.paramsConstraints"
                    v-bind:baseId="baseId"></params-list>
     </div>
     <div v-else>
-      <atomic-one-ofs v-if="param.type !== 'object'" v-bind:items="param.oneOfs"
+      <atomic-one-ofs v-if="param.type !== 'object'" v-bind:items="param.activeOneOfs"
                       v-bind:itemsType="param.type"></atomic-one-ofs>
-      <div v-for="item of param.oneOfs" v-else>
-        <params-values-list v-bind:params="item" v-bind:baseId="`oneOfs-` + baseId.toString()"
-                            v-bind:withNames="true"></params-values-list>
+      <div v-else>
+        <params-values-list
+            v-for="item of param.activeOneOfs"
+            v-bind:params="item"
+            v-bind:baseId="`oneOfs-` + baseId.toString()"
+            v-bind:withNames="true"></params-values-list>
+        <button v-on:click="addNewOneOfObject">
+          Add oneOfs item
+        </button>
       </div>
     </div>
   </div>
@@ -40,6 +46,7 @@
   import ParamsValuesList from '@/components/ParamsValuesList.vue';
   import ParamsList from '@/components/ParamsList.vue';
   import AtomicOneOfs from '@/components/AtomicOneOfs.vue';
+  import {JSONDefaults} from '@/constants';
 
   @Component({
     components: {AtomicOneOfs, ParamsValuesList, AtomicConstraints, ParamsList}
@@ -48,6 +55,10 @@
     @Prop(LayerParam) param: LayerParam | undefined;
     @Prop(String) baseId: string | undefined;
     name = "constraints";
+
+    addNewOneOfObject(event: MouseEvent) {
+      this.param!.activeOneOfs.push([]);
+    }
   }
 
 </script>

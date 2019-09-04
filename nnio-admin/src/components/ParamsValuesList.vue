@@ -18,7 +18,7 @@
     <tr>
       <td>
         <button v-on:click="addNewParam">
-          <span v-if="withNames">Add param</span>
+          <span v-if="withNames">Add param value</span>
           <span v-else>Add item</span>
         </button>
       </td>

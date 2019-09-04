@@ -35,8 +35,7 @@
 </template>
 <!--
 TODO:
-  save ALL constraints (in case person changes type, e.g. make fields activeConstraints and allConstraints[key: JSONType]
-  add `save` functionality
+  add `type` <select> to ParamsValuesList (it is parsed correctly, but you can't add Object props to Objects)
   add `rename layer` functionality
  -->
 <div>
@@ -110,6 +109,7 @@ TODO:
       const type_ = paramValue_["type"];
       const required_ = requiredParams.includes(name_);
       const oneOfs = Admin.parseOneOfs(paramValue_, type_);
+
       const constraints_ =
         (oneOfs && oneOfs.length > 0)
           ? LayerParam.defaultConstraints[type_]

@@ -1,29 +1,35 @@
 import {Dictionary} from 'vue-router/types/router';
+import {JSONTypes} from '@/constants';
 
 export default class LayerParam {
   public isOneOf: boolean;
+  public additionalConstraints: any = JSON.parse(JSON.stringify(LayerParam.defaultConstraints)); // basically a copy
+  public oneOfs: Dictionary<any[]>;
 
-  static createDefault() {
-    return new LayerParam("", "string", false);
+  public get activeOneOfs(): any[] {
+    return this.oneOfs[this.type];
+  }
+
+  public get activeConstraints(): any {
+    return this.additionalConstraints[this.type];
   }
 
   constructor(public name: string,
               public type: string,
               public required: boolean,
-              public additionalConstraints: any = {},
-              public oneOfs: any[] = []) {
-    const defaultConstraints: any = LayerParam.defaultConstraints[this.type];
-    if (Object.getOwnPropertyNames(additionalConstraints).length === 0) {
-      console.log("EMPTY additionalConstraints");
-      this.additionalConstraints = defaultConstraints;
-    } else {
-      for (let k of Object.keys(defaultConstraints)) {
-        if (typeof this.additionalConstraints[k] === "undefined") {
-          this.additionalConstraints[k] = defaultConstraints[k];
-        }
-      }
+              constraints: Dictionary<any> = {},
+              oneOfs: any[] = []) {
+    this.oneOfs = {};
+    for (const k of JSONTypes) {
+      this.oneOfs[k] = [];
     }
+    this.oneOfs[type] = oneOfs || [];
+    this.additionalConstraints[type] = constraints || LayerParam.defaultConstraints[type];
     this.isOneOf = (oneOfs && oneOfs.length > 0);
+  }
+
+  static createDefault() {
+    return new LayerParam("", "string", false);
   }
 
   static readonly defaultConstraints: Dictionary<object> = {

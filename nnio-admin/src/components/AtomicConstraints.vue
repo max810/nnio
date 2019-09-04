@@ -3,13 +3,13 @@
     <table class="table atomic" v-if="['number', 'integer'].includes(param.type)">
       <tr>
         <td>
-          <input type="number" v-model.number="param.additionalConstraints.minimum">
+          <input type="number" v-model.number="param.activeConstraints.minimum">
         </td>
         <td style="min-width: 150px; text-align: center">
           <label><= Value <=</label>
         </td>
         <td>
-          <input type="number" v-model.number="param.additionalConstraints.maximum">
+          <input type="number" v-model.number="param.activeConstraints.maximum">
         </td>
       </tr>
     </table>
@@ -19,13 +19,13 @@
     <table class="table" v-else-if="['array'].includes(param.type)">
       <tr>
         <td>
-          <input type="number" min="0" v-model.number="param.additionalConstraints.minItems">
+          <input type="number" min="0" v-model.number="param.activeConstraints.minItems">
         </td>
         <td style="min-width: 150px; text-align: center">
           <label><= # of items <=</label>
         </td>
         <td>
-          <input type="number" min="0" v-model.number="param.additionalConstraints.maxItems">
+          <input type="number" min="0" v-model.number="param.activeConstraints.maxItems">
         </td>
       </tr>
       <tr>
@@ -33,7 +33,7 @@
           Type of items
         </td>
         <td>
-          <select v-model="param.additionalConstraints.itemsType">
+          <select v-model="param.activeConstraints.itemsType">
             <option></option>
             <option v-for="t of JSONTypes">
               {{ t }}
