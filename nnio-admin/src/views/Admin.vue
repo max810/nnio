@@ -35,8 +35,8 @@
 </template>
 <!--
 TODO:
-  add `type` <select> to ParamsValuesList (it is parsed correctly, but you can't add Object props to Objects)
-  add `rename layer` functionality
+  add constraints for array items
+  add `rename layer` , `add layer`, `delete layer` functionality
  -->
 <div>
 
@@ -157,8 +157,6 @@ TODO:
             const localProp = prop.properties[k];
             res.push(this.parseLayerParam(k, localProp, prop.required));
           }
-
-          res = {'paramsConstraints': res};
 
           return res;
       }

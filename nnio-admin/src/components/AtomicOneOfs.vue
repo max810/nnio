@@ -10,7 +10,7 @@
     </tr>
     <tr>
       <td>
-        <button v-on:click="addOneOf">Add</button>
+        <button v-on:click="addOneOf">Add atomic oneOf item</button>
       </td>
     </tr>
   </table>

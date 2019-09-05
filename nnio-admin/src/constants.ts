@@ -12,5 +12,5 @@ export const JSONDefaults: Dictionary<any> = {
   "number": 0.0,
   "array": [],
   "boolean": false,
-  "object": {}
+  "object": []
 };

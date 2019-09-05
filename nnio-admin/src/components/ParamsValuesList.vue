@@ -3,14 +3,21 @@
     <tr v-for="param of params">
       <td class="fit" v-if="withNames">
         <input type="text"
-               v-model="param.name">
+               v-model="param.name" pattern="[a-zA-Z0-9]">
       </td>
       <td>
-        <atomic-param-value-input v-if="param.type !== 'object' && param.type !== 'array'" v-bind:param="param"
+        <select v-model="param.type">
+          <option v-for="t of JSONTypes">
+            {{ t }}
+          </option>
+        </select>
+        <br>
+        <atomic-param-value-input v-if="!['array', 'object'].includes(param.type)" v-bind:param="param"
                                   v-bind:paramType="param.type"></atomic-param-value-input>
-        <params-values-list v-else v-bind:withNames="param.type !== 'array'" v-bind:params="param.value"
+        <params-values-list v-else v-bind:withNames="param.type !== 'array'" v-bind:params="param.activeValue"
                             v-bind:baseId="`inner-` + baseId"></params-values-list>
       </td>
+
       <td>
         <close-button v-on:click="deleteLayerParamValue(param)"></close-button>
       </td>
@@ -28,8 +35,6 @@
 
 <script lang="ts">
   import {Component, Prop, Vue} from 'vue-property-decorator';
-  import LayerParam from '@/classes/LayerParam';
-  // import Constraints from '@/components/Constraints.vue';
   import {JSONTypes} from "@/constants";
   import LayerParamValue from "@/classes/LayerParamValue";
   import AtomicParamValueInput from '@/components/AtomicParamValueInput.vue';
@@ -37,8 +42,6 @@
 
   @Component({
     components: {CloseButton, AtomicParamValueInput}
-
-    // components: {Constraints}
   })
   export default class ParamsValuesList extends Vue {
     @Prop(Array) params: LayerParamValue[] | undefined;

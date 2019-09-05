@@ -1,10 +1,10 @@
 <template>
   <input v-if="['number', 'integer'].includes(paramType)" type="number"
-         v-model.number="param.value">
+         v-model.number="param.activeValue">
   <input v-else-if="['string'].includes(paramType)" type="text"
-         v-model="param.value">
+         v-model="param.activeValue">
   <select v-else-if="['boolean'].includes(paramType)"
-          v-model="param.value">
+          v-model="param.activeValue">
     <option></option>
     <option>true</option>
     <option>false</option>

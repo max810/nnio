@@ -3,7 +3,7 @@
     <tr v-for="param of params">
       <td class="fit">
         <input type="text"
-               v-model="param.name">
+               v-model="param.name" pattern="[a-zA-Z0-9]">
       </td>
       <td>
         <div class="form-check form-check-inline">
@@ -64,8 +64,6 @@
 
   @Component({
     components: {CloseButton}
-
-    // components: {Constraints}
   })
   export default class ParamsList extends Vue {
     @Prop(Array) params: LayerParam[] | undefined;
