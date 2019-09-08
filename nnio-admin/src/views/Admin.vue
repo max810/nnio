@@ -24,7 +24,6 @@
               role="tabpanel"
               v-bind:aria-labelledby="`list-${lSchema.layerType}-list`"
           >
-            <!--        for div ^      v-bind:key="lSchema.layerType"-->
             <params-list v-bind:params="lSchema.layerParams" v-bind:baseId="lSchema.layerType">
             </params-list>
           </div>
@@ -107,7 +106,7 @@ TODO:
       let paramValue_ = pValue as any;
       const name_ = pName;
       const type_ = paramValue_["type"];
-      const required_ = requiredParams.includes(name_);
+      const required_ = (requiredParams || []).includes(name_);
       const oneOfs = Admin.parseOneOfs(paramValue_, type_);
 
       const constraints_ =
@@ -132,7 +131,7 @@ TODO:
       return new LayerParamValue(pName, pType, value);
     }
 
-    static parseConstraints(prop: any, type_: string = prop.type) {
+    static parseConstraints(prop: any, type_: string = prop.type): any {
       switch (type_) {
         case "string":
         case "boolean":
@@ -144,12 +143,13 @@ TODO:
             minimum: typeof prop.minimum === "undefined" ? null : prop.minimum,
           };
         case "array":
+          debugger;
           const items = prop.items || {};
-          // items will NEVER be Array, only object
+          // items mustn't EVER be Array, only object
           return {
-            maxItems: typeof items.maxItems === "undefined" ? null : items.maxItems,
-            minItems: typeof items.minItems === "undefined" ? null : items.minItems,
-            itemsType: typeof items.type === "undefined" ? null : items.type,
+            maxItems: typeof prop.maxItems === "undefined" ? null : prop.maxItems,
+            minItems: typeof prop.minItems === "undefined" ? null : prop.minItems,
+            itemsConstraints: this.parseLayerParam("itemsConstraints", items, ["itemsConstraints"])
           };
         case "object":
           let res: any = [];

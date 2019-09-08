@@ -79,6 +79,23 @@
               "b": 5
             }
           ]
+        },
+        "test_arr_obj": {
+          "type": "array",
+          "minItems": 5,
+          "items": {
+            "type": "object",
+            "properties": {
+              "a": {
+                "type": "string"
+              },
+              "b": {
+                "type": "number",
+                "minimum": -3
+              }
+            },
+            "required": []
+          }
         }
       },
       "required": [

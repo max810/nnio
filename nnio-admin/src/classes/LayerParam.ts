@@ -48,6 +48,7 @@ export default class LayerParam {
         minItems: null,
         maxItems: null,
         itemsType: null,
+        itemsConstraints: []
       },
     boolean: {},
     string: {},

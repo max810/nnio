@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!--    {{ param.name }} constraints-->
+<!--        {{ param.name }} constraints-->
     <table>
       <tr>
         <td>
@@ -21,6 +21,11 @@
       <atomic-constraints v-if="param.type !== 'object'" v-bind:param="param"></atomic-constraints>
       <params-list v-else v-bind:params="param.activeConstraints"
                    v-bind:baseId="baseId"></params-list>
+      <div v-if="param.type === 'array'">
+        Constraints for array items:
+        <constraints v-bind:param="param.activeConstraints.itemsConstraints"
+                     v-bind:baseId="`items-${baseId}`"></constraints>
+      </div>
     </div>
     <div v-else>
       <atomic-one-ofs v-if="!['object', 'array'].includes(param.type)" v-bind:items="param.activeOneOfs"

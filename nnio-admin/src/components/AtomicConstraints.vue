@@ -33,7 +33,7 @@
           Type of items
         </td>
         <td>
-          <select v-model="param.activeConstraints.itemsType">
+          <select v-model="param.activeConstraints.itemsConstraints.type">
             <option></option>
             <option v-for="t of JSONTypes">
               {{ t }}
