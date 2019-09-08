@@ -13,6 +13,10 @@
               role="tab"
               v-bind:aria-controls="lSchema.layerType"
           >{{ lSchema.layerType }}</a>
+          <div class="list-group-item">
+            <button class="btn btn-primary" v-on:click="addLayerSchema" style="width: 100%; height: 100%;">+
+            </button>
+          </div>
         </div>
       </div>
       <div class="col-10">
@@ -24,6 +28,10 @@
               role="tabpanel"
               v-bind:aria-labelledby="`list-${lSchema.layerType}-list`"
           >
+            Rename layer: <input v-model="lSchema.layerType">
+            <close-button v-on:click="deleteLayerSchema(param)"></close-button>
+            <br>
+            <br>
             <params-list v-bind:params="lSchema.layerParams" v-bind:baseId="lSchema.layerType">
             </params-list>
           </div>
@@ -34,8 +42,7 @@
 </template>
 <!--
 TODO:
-  add constraints for array items
-  add `rename layer` , `add layer`, `delete layer` functionality
+  add save functionality
  -->
 <div>
 
@@ -43,123 +50,27 @@ TODO:
 <script lang="ts">
   import VRuntimeTemplate from "v-runtime-template";
   import {Component, Vue} from "vue-property-decorator";
-  import {Dictionary} from "vue-router/types/router";
   import Axios from "axios";
   import {backendUrls, JSONTypes} from "@/constants";
   import LayerSchema from '@/classes/LayerSchema';
-  import LayerParam from '@/classes/LayerParam';
   import Constraints from '@/components/Constraints.vue';
   import ParamsList from '@/components/ParamsList.vue';
-  import LayerParamValue from '@/classes/LayerParamValue';
+  import CloseButton from '@/components/CloseButton.vue';
+  import {parseLayersSchemas} from '@/utils/LayerSchemaParsing';
 
   @Component({
-    components: {ParamsList, Constraints, VRuntimeTemplate}
+    components: {ParamsList, Constraints, VRuntimeTemplate, CloseButton}
   })
   export default class Admin extends Vue {
     layerSchemas: LayerSchema[] = [];
     JSONTypes = JSONTypes;
 
-    static parseLayersSchemas(json: string | object) {
-      let data: Dictionary<any>;
-      let results: Array<LayerSchema> = [];
-      if (typeof json == "string") {
-        data = JSON.parse(json) as Dictionary<any>;
-      } else {
-        data = json as Dictionary<any>;
-      }
-
-      for (const [layerType, layerData] of Object.entries(data)) {
-        const params = layerData.properties.params.properties || {};
-        const requiredParams: string[] = layerData.properties.params.required;
-        const layerParams: LayerParam[] = [];
-
-        for (const [pName, pValue] of Object.entries(params)) {
-          const lp = Admin.parseLayerParam(pName, pValue as any, requiredParams);
-          layerParams.push(lp);
-        }
-        const layerSchema = new LayerSchema(layerType, layerParams);
-
-        results.push(layerSchema);
-      }
-      (<any>window).SCHEMA = results;
-      return results;
+    deleteLayerSchema(lSchema: LayerSchema) {
+      this.layerSchemas!.splice(this.layerSchemas!.indexOf(lSchema), 1);
     }
 
-    static parseOneOfs(prop: any, type: string) {
-      const oneOfs: any[] = prop.enum || [];
-      if (type !== 'object' && type !== 'array') {
-        return oneOfs.map(val => new LayerParamValue("", type, val));
-      } else {
-        const res: LayerParamValue[][] = [];
-        for (const example of oneOfs) {
-          const exampleParams: LayerParamValue[] = [];
-          for (const [pName, pValue] of Object.entries(example)) {
-            exampleParams.push(this.parseLayerParamValues(pValue, pName));
-          }
-          res.push(exampleParams);
-        }
-        return res;
-      }
-    }
-
-    static parseLayerParam(pName: string, pValue: any, requiredParams: string[]) {
-      let paramValue_ = pValue as any;
-      const name_ = pName;
-      const type_ = paramValue_["type"];
-      const required_ = (requiredParams || []).includes(name_);
-      const oneOfs = Admin.parseOneOfs(paramValue_, type_);
-
-      const constraints_ =
-        (oneOfs && oneOfs.length > 0)
-          ? LayerParam.defaultConstraints[type_]
-          : Admin.parseConstraints(paramValue_);
-
-      return new LayerParam(name_, type_, required_, constraints_, oneOfs);
-    }
-
-    static parseLayerParamValues(prop: any, pName: string) {
-      const pType = Array.isArray(prop) ? "array" : typeof prop;
-      let value = prop;
-      if (pType === 'object' || pType === 'array') {
-        const res: LayerParamValue[] = [];
-        for (const [pName_1, pValue_1] of Object.entries(prop)) {
-          res.push(this.parseLayerParamValues(pValue_1, pName_1));
-        }
-        value = res;
-      }
-
-      return new LayerParamValue(pName, pType, value);
-    }
-
-    static parseConstraints(prop: any, type_: string = prop.type): any {
-      switch (type_) {
-        case "string":
-        case "boolean":
-          return LayerParam.defaultConstraints[type_];
-        case "number":
-        case "integer":
-          return {
-            maximum: typeof prop.maximum === "undefined" ? null : prop.maximum,
-            minimum: typeof prop.minimum === "undefined" ? null : prop.minimum,
-          };
-        case "array":
-          debugger;
-          const items = prop.items || {};
-          // items mustn't EVER be Array, only object
-          return {
-            maxItems: typeof prop.maxItems === "undefined" ? null : prop.maxItems,
-            minItems: typeof prop.minItems === "undefined" ? null : prop.minItems,
-            itemsConstraints: this.parseLayerParam("itemsConstraints", items, ["itemsConstraints"])
-          };
-        case "object":
-          let res: any = [];
-          for (const k of Object.keys(prop.properties)) {
-            const localProp = prop.properties[k];
-            res.push(this.parseLayerParam(k, localProp, prop.required));
-          }
-
-          return res;
-      }
+    addLayerSchema(event: MouseEvent) {
+      this.layerSchemas!.push(LayerSchema.createDefault());
     }
 
     mounted() {
@@ -169,17 +80,16 @@ TODO:
         .then(
           response => {
             console.log(response);
-            this.layerSchemas = Admin.parseLayersSchemas(response.data);
+            this.layerSchemas = parseLayersSchemas(response.data);
           },
           err => {
             if (err.status == 401) {
               this.$router.push({name: 'login', params: {msg: 'LOGIN EXPIRED'}});
             }
           });
-
-      console.log(this.layerSchemas);
     }
   }
+
 
 </script>
 

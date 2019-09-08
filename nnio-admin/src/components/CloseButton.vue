@@ -1,6 +1,6 @@
 <template>
   <button type="button" class="close" aria-label="Close" v-on:click="clicked">
-    <span aria-hidden="true">&times;</span>
+    <span aria-hidden="true" style="font-size: 36px">&times;</span>
   </button>
 </template>
 
