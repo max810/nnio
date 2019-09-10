@@ -1,6 +1,6 @@
 <template>
   <div>
-<!--        {{ param.name }} constraints-->
+    <!--        {{ param.name }} constraints-->
     <table>
       <tr>
         <td>
@@ -52,6 +52,7 @@
   import ParamsList from '@/components/ParamsList.vue';
   import AtomicOneOfs from '@/components/AtomicOneOfs.vue';
   import {JSONDefaults} from '@/constants';
+  import LayerParamValue from '@/classes/LayerParamValue';
 
   @Component({
     components: {AtomicOneOfs, ParamsValuesList, AtomicConstraints, ParamsList}
@@ -62,7 +63,7 @@
     name = "constraints";
 
     addNewOneOfObject(event: MouseEvent) {
-      this.param!.activeOneOfs.push([]);
+      this.param!.activeOneOfs.push(<any>[]);
     }
   }
 

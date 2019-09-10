@@ -96,6 +96,21 @@
             },
             "required": []
           }
+        },
+        "test_arr_enum": {
+          "type": "array",
+          "enum": [
+            [
+              1,
+              2,
+              3
+            ],
+            [
+              "sss",
+              "bbb",
+              "ccc"
+            ]
+          ]
         }
       },
       "required": [

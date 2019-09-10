@@ -9,24 +9,6 @@
     <option>true</option>
     <option>false</option>
   </select>
-  <!--    <table v-else-if="['array'].includes(paramType)">-->
-  <!--      <tr v-for="item of param">-->
-  <!--        <td>-->
-  <!--          <input v-model="item.value">-->
-  <!--          Type:-->
-  <!--          <select v-model="item.type">-->
-  <!--            <option v-for="t of JSONTypes">-->
-  <!--              {{ t }}-->
-  <!--            </option>-->
-  <!--          </select>-->
-  <!--        </td>-->
-  <!--      </tr>-->
-  <!--      <tr>-->
-  <!--        <td>-->
-  <!--          <button>TODO Add 1</button>-->
-  <!--        </td>-->
-  <!--      </tr>-->
-  <!--    </table>-->
 </template>
 
 <script lang="ts">

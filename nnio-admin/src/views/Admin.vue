@@ -17,6 +17,14 @@
             <button class="btn btn-primary" v-on:click="addLayerSchema" style="width: 100%; height: 100%;">+
             </button>
           </div>
+          <br>
+          <br>
+          <br>
+          <br>
+          <div class="list-group-item">
+            <button class="btn btn-success" v-on:click="saveSchemas" style="width: 100%; height: 100%;">Save
+            </button>
+          </div>
         </div>
       </div>
       <div class="col-10">
@@ -57,6 +65,7 @@ TODO:
   import ParamsList from '@/components/ParamsList.vue';
   import CloseButton from '@/components/CloseButton.vue';
   import {parseLayersSchemas} from '@/utils/LayerSchemaParsing';
+  import {layerSchemasToJsonSchemas} from '@/utils/LayerSchemaSaving';
 
   @Component({
     components: {ParamsList, Constraints, VRuntimeTemplate, CloseButton}
@@ -64,6 +73,13 @@ TODO:
   export default class Admin extends Vue {
     layerSchemas: LayerSchema[] = [];
     JSONTypes = JSONTypes;
+
+    saveSchemas() {
+      console.log("OK!");
+      const results = layerSchemasToJsonSchemas(this.layerSchemas);
+      (<any>window).RESULTS = results;
+    }
+
 
     deleteLayerSchema(lSchema: LayerSchema) {
       this.layerSchemas!.splice(this.layerSchemas!.indexOf(lSchema), 1);

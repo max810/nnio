@@ -1,23 +1,24 @@
 import {Dictionary} from 'vue-router/types/router';
 import {JSONTypes} from '@/constants';
+import NamelessLayerParamValue from '@/classes/NamelessLayerParamValue';
 
 export default class LayerParam {
   public isOneOf: boolean;
   public additionalConstraints: any = JSON.parse(JSON.stringify(LayerParam.defaultConstraints)); // basically a copy
-  public oneOfs: Dictionary<any[]>;
+  public oneOfs: Dictionary<NamelessLayerParamValue[] | NamelessLayerParamValue[][]>;
 
-  public get activeOneOfs(): any[] {
+  public get activeOneOfs(): NamelessLayerParamValue[] | NamelessLayerParamValue[][] {
     return this.oneOfs[this.type];
   }
 
-  public get activeConstraints(): any {
+  public get activeConstraints(): LayerParam[] | any {
     return this.additionalConstraints[this.type];
   }
 
   constructor(public name: string,
               public type: string,
               public required: boolean,
-              constraints: Dictionary<any> = {},
+              constraints: Dictionary<LayerParam[] | any> = {},
               oneOfs: any[] = []) {
     this.oneOfs = {};
     for (const k of JSONTypes) {
@@ -47,7 +48,6 @@ export default class LayerParam {
       {
         minItems: null,
         maxItems: null,
-        itemsType: null,
         itemsConstraints: []
       },
     boolean: {},

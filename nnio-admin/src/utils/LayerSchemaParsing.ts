@@ -87,7 +87,6 @@ function parseConstraints(prop: any, type_: string = prop.type): any {
         minimum: typeof prop.minimum === "undefined" ? null : prop.minimum,
       };
     case "array":
-      debugger;
       const items = prop.items || {};
       // items mustn't EVER be Array, only object
       return {
