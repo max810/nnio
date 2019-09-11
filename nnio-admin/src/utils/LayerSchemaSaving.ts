@@ -4,10 +4,6 @@ import NamelessLayerParamValue from '@/classes/NamelessLayerParamValue';
 import LayerParamValue from '@/classes/LayerParamValue';
 
 export function layerSchemasToJsonSchemas(schemas: LayerSchema[]): any {
-  // debugger;
-  // todo - 1) exclude `null` constraints
-  //  2) check key/value with names for object (i got 0, 1, 2.. instead of properties names)
-  //  3) check object oneOfs parsing - i got undefined instead of all properties
   const allSchemas: any = {};
   for (const s of schemas) {
     const props: any = {};

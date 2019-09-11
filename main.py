@@ -9,7 +9,7 @@ import uvicorn
 from fastapi import FastAPI
 
 from DAL import models
-from routers import architecture_exporting, users
+from routers import architecture_exporting, users, admin
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from starlette.middleware.cors import CORSMiddleware
@@ -46,6 +46,12 @@ app.include_router(
     users.router,
     prefix='/user',
     tags=['User authentication and authorization']
+)
+
+app.include_router(
+    admin.router,
+    prefix='/admin',
+    tags=['Layers schema editing']
 )
 
 SQLALCHEMY_DATABASE_URL = os.environ['DATABASE_URL']
@@ -90,5 +96,5 @@ if __name__ == "__main__":
 
 # TODO:
 #  1) add beautifier after generating code
-#  2) Add admin page to maintain supported layers and their params
+#  2) save to DB, not to local files
 #  3) DTYPE WILL NOT BE IN THE MODEL(check for dtype - it should be the same for all layer or not given at all)

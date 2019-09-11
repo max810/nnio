@@ -3,7 +3,8 @@ import {Dictionary} from 'vue-router/types/router';
 export const backendBaseUrl = "http://localhost:8000";
 export const backendUrls = {
   login: backendBaseUrl + "/user/login",
-  getLayersSchemas: backendBaseUrl + "/user/layers_schemas",
+  getLayersSchemas: backendBaseUrl + "/admin/layers_schemas",
+  saveLayersSchemas: backendBaseUrl + "/admin/save_layers_schemas",
 };
 export const JSONTypes = ['string', 'integer', 'number', 'array', 'boolean', 'object'];
 export const JSONDefaults: Dictionary<any> = {

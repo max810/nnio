@@ -48,15 +48,10 @@
     </div>
   </div>
 </template>
-<!--
-TODO:
-  add save functionality
- -->
 <div>
 
 </div>
 <script lang="ts">
-  import VRuntimeTemplate from "v-runtime-template";
   import {Component, Vue} from "vue-property-decorator";
   import Axios from "axios";
   import {backendUrls, JSONTypes} from "@/constants";
@@ -68,7 +63,7 @@ TODO:
   import {layerSchemasToJsonSchemas} from '@/utils/LayerSchemaSaving';
 
   @Component({
-    components: {ParamsList, Constraints, VRuntimeTemplate, CloseButton}
+    components: {ParamsList, Constraints, CloseButton}
   })
   export default class Admin extends Vue {
     layerSchemas: LayerSchema[] = [];
@@ -78,8 +73,17 @@ TODO:
       console.log("OK!");
       const results = layerSchemasToJsonSchemas(this.layerSchemas);
       (<any>window).RESULTS = results;
-    }
 
+      Axios
+        .post(backendUrls.saveLayersSchemas, results)
+        .then(
+          response => {
+            console.log(response);
+          },
+          err => {
+            console.log(err);
+          });
+    }
 
     deleteLayerSchema(lSchema: LayerSchema) {
       this.layerSchemas!.splice(this.layerSchemas!.indexOf(lSchema), 1);
