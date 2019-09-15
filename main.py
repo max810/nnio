@@ -3,7 +3,6 @@ import os
 
 from starlette.requests import Request
 from starlette.responses import Response
-from starlette.staticfiles import StaticFiles
 
 import DAL
 import uvicorn
@@ -15,12 +14,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from starlette.middleware.cors import CORSMiddleware
 
-# TODO - check if works on deploy
 origins = [
     # "http://localhost:8080",
     # "https://localhost:*",
     "*://localhost:*/*",
-    "https://max810.github.io*"
+    "https://max810.github.io"
 ]
 
 logging.basicConfig(
@@ -29,7 +27,6 @@ logging.basicConfig(
 )
 
 app = FastAPI()
-app.mount("/admin/static", StaticFiles(directory="nnio-admin/dist"), name="static")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
