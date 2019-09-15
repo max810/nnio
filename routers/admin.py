@@ -22,7 +22,7 @@ def get_admin_page(request: Request):
 def get_layers_schemas(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     layer_schemas_strs = []
     for schema in db.query(db_models.LayerSchema):
-        layer_schemas_strs.append("{}: {}".format(schema.layer_type, schema.layer_schema))
+        layer_schemas_strs.append('"{}": {}'.format(schema.layer_type, schema.layer_schema))
 
     res_str = ",".join(layer_schemas_strs)
     res_str = "{" + res_str + "}"
