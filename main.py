@@ -3,6 +3,7 @@ import os
 
 from starlette.requests import Request
 from starlette.responses import Response
+from starlette.staticfiles import StaticFiles
 
 import DAL
 import uvicorn
@@ -19,6 +20,7 @@ origins = [
     # "http://localhost:8080",
     # "https://localhost:*",
     "*://localhost:*/*",
+    "https://max810.github.io*"
 ]
 
 logging.basicConfig(
@@ -27,6 +29,7 @@ logging.basicConfig(
 )
 
 app = FastAPI()
+app.mount("/admin/static", StaticFiles(directory="nnio-admin/dist"), name="static")
 app.add_middleware(
     CORSMiddleware,
     # allow_origins=origins,
