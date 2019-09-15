@@ -21,7 +21,7 @@ def get_admin_page(request: Request):
 def get_layers_schemas(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     layer_schemas = {}
     for schema in db.query(db_models.LayerSchema):
-        layer_schemas[schema.layer_type] = schema.layer_schema
+        layer_schemas[schema.layer_type] = json.loads(schema.layer_schema)
 
     return layer_schemas
 
@@ -31,6 +31,6 @@ def post_save_layers_schemas(body: dict, token: str = Depends(oauth2_scheme), db
     db.query(db_models.LayerSchema).delete()
 
     for layer_type, layer_schema in body.items():
-        db.add(db_models.LayerSchema(layer_type, layer_schema))
+        db.add(db_models.LayerSchema(layer_type, json.dumps(layer_schema)))
     db.commit()
     # json.dump(layer_schema, open('BLL/layer_schemas_experimental/{}.json'.format(layer_type), 'wt'))
