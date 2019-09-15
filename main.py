@@ -95,6 +95,5 @@ if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
 
 # TODO:
-#  1) ? add beautifier after generating code
-#  2) Save to DB, not to local files
-#  3) --DTYPE WILL NOT BE IN THE MODEL(check for dtype - it should be the same for all layer or not given at all)
+#  1) ? add Python beautifier after generating code
+#  --DTYPE WILL NOT BE IN THE MODEL(check for dtype - it should be the same for all layer or not given at all)
