@@ -32,8 +32,8 @@ app = FastAPI()
 app.mount("/admin/static", StaticFiles(directory="nnio-admin/dist"), name="static")
 app.add_middleware(
     CORSMiddleware,
-    # allow_origins=origins,
-    allow_origin_regex=".*://localhost:.*",
+    allow_origins=origins,
+    # allow_origin_regex=".*://localhost:.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
