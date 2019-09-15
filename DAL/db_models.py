@@ -18,3 +18,10 @@ class User(Base):
             'pbkdf2_sha512',
         ],
     ))
+
+
+class LayerSchema(Base):
+    __tablename__ = 'layers_schemas'
+
+    layer_type = Column(String, primary_key=True, index=True)
+    layer_schema = Column(String)

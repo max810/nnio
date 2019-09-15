@@ -8,9 +8,9 @@ import DAL
 import uvicorn
 from fastapi import FastAPI
 
-from DAL import models
+from DAL import db_models
 from routers import architecture_exporting, users, admin
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, Table
 from sqlalchemy.orm import sessionmaker, Session
 from starlette.middleware.cors import CORSMiddleware
 
@@ -64,7 +64,7 @@ engine = create_engine(
     SQLALCHEMY_DATABASE_URL
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-DAL.models.Base.metadata.create_all(bind=engine)
+DAL.db_models.Base.metadata.create_all(bind=engine)
 
 
 @app.middleware("http")
@@ -83,9 +83,9 @@ if __name__ == "__main__":
     sess: Session = SessionLocal()
 
     logging.info("About to create a user")
-    user = sess.query(models.User).filter(models.User.email == 'admin@gmail.com').first()
+    user = sess.query(db_models.User).filter(db_models.User.email == 'admin@gmail.com').first()
     if not user:
-        user = models.User(email='admin@gmail.com', hashed_password=os.environ['DB_ADMIN_DEFAULT_PASSWORD'])
+        user = db_models.User(email='admin@gmail.com', hashed_password=os.environ['DB_ADMIN_DEFAULT_PASSWORD'])
         sess.add(user)
         sess.commit()
         sess.refresh(user)
@@ -95,6 +95,6 @@ if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
 
 # TODO:
-#  1) add beautifier after generating code
-#  2) save to DB, not to local files
-#  3) DTYPE WILL NOT BE IN THE MODEL(check for dtype - it should be the same for all layer or not given at all)
+#  1) ? add beautifier after generating code
+#  2) Save to DB, not to local files
+#  3) --DTYPE WILL NOT BE IN THE MODEL(check for dtype - it should be the same for all layer or not given at all)

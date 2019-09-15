@@ -1,9 +1,13 @@
 import json
 from pathlib import Path
 
+from sqlalchemy.orm import Session
 from starlette.requests import Request
 from fastapi import Depends, FastAPI, HTTPException, APIRouter
+
+from DAL import db_models
 from routers.common import oauth2_scheme, templates
+from routers.users import get_db
 
 router = APIRouter()
 
@@ -14,18 +18,19 @@ def get_admin_page(request: Request):
 
 
 @router.get("/layers_schemas")
-def get_layers_schemas(token: str = Depends(oauth2_scheme)):
-    p_layer_schemas = Path('BLL/layer_schemas')
+def get_layers_schemas(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     layer_schemas = {}
-    for p_schema in p_layer_schemas.glob("*.json"):
-        schema = json.load(open(p_schema))
-        layer_schemas[p_schema.stem] = schema
+    for schema in db.query(db_models.LayerSchema):
+        layer_schemas[schema.layer_type] = schema.layer_schema
 
-    # TODO - don't deserialize JSON, just combine strings and return
     return layer_schemas
 
 
 @router.post("/save_layers_schemas")
-def post_save_layers_schemas(body: dict, token: str = Depends(oauth2_scheme)):
+def post_save_layers_schemas(body: dict, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    db.query(db_models.LayerSchema).delete()
+
     for layer_type, layer_schema in body.items():
-        json.dump(layer_schema, open('BLL/layer_schemas_experimental/{}.json'.format(layer_type), 'wt'))
+        db.add(db_models.LayerSchema(layer_type, layer_schema))
+    db.commit()
+    # json.dump(layer_schema, open('BLL/layer_schemas_experimental/{}.json'.format(layer_type), 'wt'))

@@ -13,14 +13,10 @@ from jwt import PyJWTError
 from pydantic import BaseModel
 import starlette.status as status
 
-from DAL import schemas, users_repository, models
-from routers.common import SECRET_KEY, ALGORITHM, oauth2_scheme, ACCESS_TOKEN_EXPIRE_MINUTES, templates
+from DAL import schemas, users_repository, db_models
+from routers.common import SECRET_KEY, ALGORITHM, oauth2_scheme, ACCESS_TOKEN_EXPIRE_MINUTES, templates, get_db
 
 router = APIRouter()
-
-
-def get_db(request: Request):
-    return request.state.db
 
 
 class Token(BaseModel):
@@ -33,7 +29,7 @@ class TokenData(BaseModel):
 
 
 def authenticate_user(db: Session, email: str, password: str):
-    user: models.User = users_repository.get_user_by_email(db, email)
+    user: db_models.User = users_repository.get_user_by_email(db, email)
     if not user:
         return False
 
