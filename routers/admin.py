@@ -21,6 +21,7 @@ def get_admin_page(request: Request):
 @router.get("/layers_schemas")
 def get_layers_schemas(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     layer_schemas_strs = []
+    # concatenating JSON representationsF from db (they are already serialized strings)
     for schema in db.query(db_models.LayerSchema):
         layer_schemas_strs.append('"{}": {}'.format(schema.layer_type, schema.layer_schema))
 
@@ -36,6 +37,7 @@ def post_save_layers_schemas(body: dict, token: str = Depends(oauth2_scheme), db
 
     for layer_type, layer_schema in body.items():
         db.add(db_models.LayerSchema(
+            # such separators -> minified JSON (no spaces and no indents)
             layer_type=layer_type, layer_schema=json.dumps(layer_schema, separators=(',', ':'))
         ))
     db.commit()
