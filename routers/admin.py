@@ -19,7 +19,7 @@ def get_admin_page(request: Request):
 
 
 @router.get("/layers_schemas")
-def get_layers_schemas(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+def get_layers_schemas(db: Session = Depends(get_db)):
     layer_schemas_strs = []
     # concatenating JSON representationsF from db (they are already serialized strings)
     for schema in db.query(db_models.LayerSchema):
