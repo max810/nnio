@@ -17,7 +17,7 @@ from starlette.middleware.cors import CORSMiddleware
 origins = [
     # "http://localhost:8080",
     # "https://localhost:*",
-    "*://localhost:*/*",
+    "http://localhost:8080",
     "https://max810.github.io"
 ]
 
