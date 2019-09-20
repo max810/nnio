@@ -12,8 +12,7 @@ def export_model(model: NetworkModel, framework: str, line_break: str, indent: s
 
 
 def export_keras(model: NetworkModel, cg: PythonCodeGenerator, **kwargs):
-    use_sequential_arg = str(kwargs.get('keras_prefer_sequential', False))
-    use_sequential = use_sequential_arg.lower() in ['true', 't', '1', 'y', 'yes']
+    use_sequential = kwargs.get('keras_prefer_sequential', False)
 
     if use_sequential:
         try:

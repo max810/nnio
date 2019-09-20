@@ -35,7 +35,7 @@
         "activation": "relu",
         "units": 1024,
         "kernel_regularizer": {
-          "type": "l2",
+          "regularization_type": "l2",
           "l": 0.003
         }
       }
@@ -50,7 +50,7 @@
         "activation": "sigmoid",
         "units": 1,
         "kernel_regularizer": {
-          "type": "l2",
+          "regularization_type": "l2",
           "l": 0.001
         }
       }
