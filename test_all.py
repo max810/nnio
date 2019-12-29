@@ -140,13 +140,6 @@ def test_export_from_json_file_correct():
     assert response.status_code == HTTPStatus.OK
 
 
-def test_export_from_json_file_incorrect_json():
-    files = {"architecture-file": StringIO("incorrect architecture data")}
-    response = client.request('post', '/architecture/export-from-json-file?framework=keras', files=files)
-
-    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
-
-
 def test_export_from_json_file_incorrect_data():
     files = {"architecture-file": StringIO("""{ "a": "b" }""")}
     response = client.request('post', '/architecture/export-from-json-file?framework=keras', files=files)
