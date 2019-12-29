@@ -4,7 +4,7 @@ from typing import Dict
 
 from .framework_code_generator import FrameworkCodeGenerator
 from .python_code_generator import PythonCodeGenerator
-from models import NetworkModel, FrameworkError, LayerTypes
+from models import NetworkModel, FrameworkError, LayerTypes, Layer
 
 
 class KerasGenerator(FrameworkCodeGenerator, ABC):
@@ -100,6 +100,32 @@ class KerasSequentialGenerator(KerasGenerator):
 
 
 class KerasFunctionalGenerator(KerasGenerator):
+    def __init__(self, model: NetworkModel, cg: PythonCodeGenerator):
+        func_model = self._to_functional_format(model)
+        super().__init__(func_model, cg)
+
+    @staticmethod
+    def _to_functional_format(model: NetworkModel):
+        input_layers = [l for l in model.layers if l.type == LayerTypes.Input]
+
+        if not any(input_layers):
+            first_layers = [l for l in model.layers if len(l.inputs) == 0]
+            for l in first_layers:
+                inp = Layer(
+                    name=l.name + '_input',
+                    inputs=[],
+                    outputs=[l],
+                    type=LayerTypes.Input,
+                    params=dict(
+                        shape=l.params['input_shape']
+                    )
+                )
+                l.inputs.append(inp)
+                del l.params['input_shape']
+                model.layers.append(inp)
+
+        return model
+
     def _generate_imports(self) -> str:
         s = "from keras.models import Model" + self.cg.line_break()
         s += super()._generate_imports()

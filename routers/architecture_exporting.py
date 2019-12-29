@@ -44,13 +44,10 @@ async def export_from_json_body(framework: Frameworks,
                                 indent: Indents = Indents.spaces_4,
                                 keras_prefer_sequential: bool = False):
     framework = framework.value.lower()
-    # validate_member_in(framework, KNOWN_FRAMEWORKS, "framework")
 
     line_break = line_break.value.lower()
-    # validate_member_in(line_break, line_breaks, "line_break")
 
     indent = indent.value.lower()
-    # validate_member_in(indent, indents, "indent")
 
     logging.info(framework)
     logging.info(model.id)
@@ -74,11 +71,35 @@ async def export_from_json_body(framework: Frameworks,
 
 
 def validate_model(model: ArchitectureDataModel):
-    if len(model.layers) < 1 or not any(l.type == LayerTypes.Input and len(l.inputs) == 0 for l in model.layers):
+    if len(model.layers) < 1:
         raise HTTPException(
             status.HTTP_422_UNPROCESSABLE_ENTITY,
-            "Model must have at least 2 layers one of which is Input layer with empty `inputs` property."
+            "Model must have at least 1 layer."
         )
+
+    input_layers = [l for l in model.layers if l.type == LayerTypes.Input]
+    first_layers = [l for l in model.layers if len(l.inputs) == 0 and l.type != LayerTypes.Input]
+
+    if len(input_layers) < 1 and len(first_layers) < 1:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            'Model must have at least 1 input layer\n' +
+            '(either dedicated layer(s) with type=Input or just some layer(s) with inputs=[])'
+        )
+
+    for il in input_layers:
+        if 'shape' not in il.params:
+            raise HTTPException(
+                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                'All type=Input layers must have `shape` property of type list defined in `params`'
+            )
+
+    for fl in first_layers:
+        if 'input_shape' not in fl.params:
+            raise HTTPException(
+                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                'All `first` layers (with inputs=[]) must have `input_shape` property of type list defined in `params`'
+            )
 
 
 def validate_member_in(member, collection, member_name):
@@ -86,11 +107,6 @@ def validate_member_in(member, collection, member_name):
         raise HTTPException(status.HTTP_400_BAD_REQUEST,
                             f"Unknown {member_name} {member}, known {member_name}s are: {collection}")
 
-
-# @router.post("/test")
-# async def test(**kwargs):
-#     return kwargs
-#
 
 def model_to_string(model: NetworkModel):
     res = ""
