@@ -6,8 +6,8 @@ import starlette.status as status
 from sqlalchemy.orm import Session
 from starlette.responses import PlainTextResponse
 from fastapi import HTTPException, File, APIRouter, Query, Depends
-from pydantic import ValidationError
 from jsonschema import validate
+from jsonschema.exceptions import ValidationError
 
 from BLL.exporting.model_exporting import KNOWN_FRAMEWORKS, export_model
 from models import ArchitectureDataModel, NetworkModel, line_breaks, indents, FrameworkError, LayerTypes
