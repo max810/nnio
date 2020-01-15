@@ -22,12 +22,13 @@ class FrameworkError(Exception):
 
 
 class LayerTypes(str, Enum):
+    # TODO - create dynamically based on DB contentss
     Dense = "Dense"
     Input = "Input"
     BatchNormalization = "BatchNormalization"
     Dropout = "Dropout"
     Flatten = "Flatten"
-    Concatenate = "Concatenate"
+    # Concatenate = "Concatenate"
 
 
 class LayerBase(BaseModel):

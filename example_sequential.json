@@ -22,7 +22,6 @@
         "Input_1"
       ],
       "params": {
-        "data_format": "channels_last"
       }
     },
     {

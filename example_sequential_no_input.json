@@ -8,8 +8,7 @@
       "type": "Flatten",
       "inputs": [],
       "params": {
-        "input_shape": [100, 150],
-        "data_format": "channels_last"
+        "input_shape": [100, 150]
       }
     },
     {
