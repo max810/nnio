@@ -1,13 +1,14 @@
 import json
 from io import StringIO
-from starlette.testclient import TestClient
 from http import HTTPStatus
+
+from starlette.testclient import TestClient
+
 from .main import app
 
 client = TestClient(app)
 
 valid_model_body = json.load(open('example_sequential.json'))
-valid_model_body_no_input = json.load(open('example_sequential_no_input.json'))
 valid_model_body_2_inputs = json.load(open('example_2inputs.json'))
 valid_model_body_small = json.load(open('example_sequential_small.json'))
 
@@ -44,7 +45,6 @@ def test_export_from_json_body_no_framework():
 
 
 def test_export_from_json_body_incorrect_framework():
-    # data = dict(date_created="2019-07-24 17:56:34", id="my_id_1", layers=[], name='MyModel_1')
     response = client.request('post', '/architecture/export-from-json-body?framework=mock_framework',
                               json=valid_model_body)
 
@@ -52,7 +52,6 @@ def test_export_from_json_body_incorrect_framework():
 
 
 def test_export_from_json_body_correct():
-    # data = dict(date_created="2019-07-24 17:56:34", id="my_id_1", layers=[], name='MyModel_1')
     response = client.request('post', '/architecture/export-from-json-body?framework=keras',
                               json=valid_model_body)
 
@@ -60,7 +59,6 @@ def test_export_from_json_body_correct():
 
 
 def test_export_from_json_body_correct_small():
-    # data = dict(date_created="2019-07-24 17:56:34", id="my_id_1", layers=[], name='MyModel_1')
     response = client.request('post', '/architecture/export-from-json-body?framework=keras',
                               json=valid_model_body_small)
 
@@ -68,7 +66,6 @@ def test_export_from_json_body_correct_small():
 
 
 def test_export_from_json_body_correct_optional_params():
-    # data = dict(date_created="2019-07-24 17:56:34", id="my_id_1", layers=[], name='MyModel_1')
     response = client.request(
         'post',
         '/architecture/export-from-json-body?framework=keras&keras_prefer_sequential=1&line_break=crlf',
@@ -79,7 +76,6 @@ def test_export_from_json_body_correct_optional_params():
 
 
 def test_export_from_json_body_correct_small_optional_params():
-    # data = dict(date_created="2019-07-24 17:56:34", id="my_id_1", layers=[], name='MyModel_1')
     response = client.request(
         'post',
         '/architecture/export-from-json-body?framework=keras&keras_prefer_sequential=1&line_break=crlf',
@@ -89,19 +85,7 @@ def test_export_from_json_body_correct_small_optional_params():
     assert response.status_code == HTTPStatus.OK
 
 
-def test_export_from_json_body_correct_no_input():
-    # data = dict(date_created="2019-07-24 17:56:34", id="my_id_1", layers=[], name='MyModel_1')
-    response = client.request(
-        'post',
-        '/architecture/export-from-json-body?framework=keras',
-        json=valid_model_body_no_input
-    )
-
-    assert response.status_code == HTTPStatus.OK
-
-
 def test_export_from_json_body_correct_2_inputs():
-    # data = dict(date_created="2019-07-24 17:56:34", id="my_id_1", layers=[], name='MyModel_1')
     response = client.request('post', '/architecture/export-from-json-body?framework=keras',
                               json=valid_model_body_2_inputs)
 
@@ -112,17 +96,6 @@ def test_export_from_json_body_correct_2_inputs_try_sequential():
     # data = dict(date_created="2019-07-24 17:56:34", id="my_id_1", layers=[], name='MyModel_1')
     response = client.request('post', '/architecture/export-from-json-body?framework=keras&prefer_sequential=1',
                               json=valid_model_body_2_inputs)
-
-    assert response.status_code == HTTPStatus.OK
-
-
-def test_export_from_json_body_correct_no_input_prefer_sequential():
-    # data = dict(date_created="2019-07-24 17:56:34", id="my_id_1", layers=[], name='MyModel_1')
-    response = client.request(
-        'post',
-        '/architecture/export-from-json-body?framework=keras&keras_prefer_sequential=1',
-        json=valid_model_body_no_input
-    )
 
     assert response.status_code == HTTPStatus.OK
 

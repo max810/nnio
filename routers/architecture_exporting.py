@@ -7,7 +7,8 @@ from sqlalchemy.orm import Session
 from starlette.responses import PlainTextResponse
 from fastapi import HTTPException, File, APIRouter, Query, Depends
 from jsonschema import validate
-from jsonschema.exceptions import ValidationError
+from jsonschema.exceptions import ValidationError as JsonSchemaValidationError
+from pydantic import ValidationError as PydanticValidataionError
 
 from BLL.exporting.model_exporting import KNOWN_FRAMEWORKS, export_model
 from models import ArchitectureDataModel, NetworkModel, line_breaks, indents, FrameworkError, LayerTypes
@@ -35,7 +36,7 @@ async def export_from_json_file(framework: Frameworks,
     try:
         architecture_dict = json.loads(architecture_file)
         model = ArchitectureDataModel(**architecture_dict)
-    except ValidationError as e:
+    except PydanticValidataionError as e:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Invalid architecture file:\n{}".format(e))
 
     return await export_from_json_body(framework, model, line_break, indent,
@@ -85,34 +86,19 @@ def validate_model(model: ArchitectureDataModel, layer_schemas):
         )
 
     input_layers = [l for l in model.layers if l.type == LayerTypes.Input]
-    first_layers = [l for l in model.layers if len(l.inputs) == 0 and l.type != LayerTypes.Input]
 
-    if len(input_layers) < 1 and len(first_layers) < 1:
+    if len(input_layers) < 1:
         raise HTTPException(
             status.HTTP_422_UNPROCESSABLE_ENTITY,
             'Model must have at least 1 input layer\n' +
-            '(either dedicated layer(s) with type=Input or just some layer(s) with inputs=[])'
+            '(dedicated layer(s) with type=Input and some `shape` parameter given.'
         )
-
-    for il in input_layers:
-        if 'shape' not in il.params:
-            raise HTTPException(
-                status.HTTP_422_UNPROCESSABLE_ENTITY,
-                'All type=Input layers must have `shape` property of type list defined in `params`'
-            )
-
-    for fl in first_layers:
-        if 'input_shape' not in fl.params:
-            raise HTTPException(
-                status.HTTP_422_UNPROCESSABLE_ENTITY,
-                'All `first` layers (with inputs=[]) must have `input_shape` property of type list defined in `params`'
-            )
 
     layers_schema_validation_errors = []
     for l in model.layers:
         try:
             validate(l.dict(), layer_schemas[l.type.name])
-        except ValidationError as e:
+        except JsonSchemaValidationError as e:
             layers_schema_validation_errors.append(str(e))
 
     if len(layers_schema_validation_errors):
