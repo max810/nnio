@@ -16,7 +16,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 origins = [
     "http://localhost:8080",
-    'https://nnio-project-frontend.herokuapp.com/',
+    'https://nnio-project-frontend.herokuapp.com',
     "https://max810.github.io"
 ]
 
