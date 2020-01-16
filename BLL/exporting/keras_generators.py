@@ -9,7 +9,7 @@ from models import NetworkModel, FrameworkError, LayerTypes, Layer
 
 class KerasGenerator(FrameworkCodeGenerator, ABC):
     def _parse_regularizer(self, regularizer_params: dict):
-        return self.cg.call('l1_l2', l1=regularizer_params['l1'], l2=regularizer_params['l2'])
+        return self.cg.call('l1_l2', l1=regularizer_params.get('l1', 0.0), l2=regularizer_params.get('l2', 0.0))
 
     def _generate_imports(self) -> str:
         s = "from keras.layers import "
