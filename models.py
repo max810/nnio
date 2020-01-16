@@ -97,27 +97,29 @@ class NetworkModel(ModelBase):
         layers_data_lookup = dict(zip(layer_names, layers))
         existing_layers_lookup: Dict[str, Layer] = OrderedDict()
         layers_left = deque(output_layers)
-
-        while layers_left:
-            layer_data = layers_left.popleft()
-            if layer_data.name not in existing_layers_lookup:
-                l = Layer.from_layer_data_empty(layer_data)
-                existing_layers_lookup[l.name] = l
-            else:
-                l = existing_layers_lookup[layer_data.name]
-
-            inputs = (layers_data_lookup[name] for name in layer_data.inputs)
-
-            for i in inputs:
-                if i.name not in existing_layers_lookup:
-                    li = Layer.from_layer_data_empty(i)
-                    existing_layers_lookup[li.name] = li
-                    layers_left.append(i)
+        try:
+            while layers_left:
+                layer_data = layers_left.popleft()
+                if layer_data.name not in existing_layers_lookup:
+                    l = Layer.from_layer_data_empty(layer_data)
+                    existing_layers_lookup[l.name] = l
                 else:
-                    li = existing_layers_lookup[i.name]
+                    l = existing_layers_lookup[layer_data.name]
 
-                li.outputs.append(l)
-                l.inputs.append(li)
+                inputs = (layers_data_lookup[name] for name in layer_data.inputs)
+
+                for i in inputs:
+                    if i.name not in existing_layers_lookup:
+                        li = Layer.from_layer_data_empty(i)
+                        existing_layers_lookup[li.name] = li
+                        layers_left.append(i)
+                    else:
+                        li = existing_layers_lookup[i.name]
+
+                    li.outputs.append(l)
+                    l.inputs.append(li)
+        except KeyError as e:
+            raise ValueError(f'Layer with name "{e.args[0]} does not exist, but is being referenced in the model."')
 
         return list(existing_layers_lookup.values())[::-1]
 

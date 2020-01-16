@@ -62,7 +62,13 @@ async def export_from_json_body(framework: Frameworks,
 
     layer_schemas = json.loads(get_layers_schemas(db).body)
     validate_model(model, layer_schemas)
-    net_model = NetworkModel.from_data_model(model)
+    try:
+        net_model = NetworkModel.from_data_model(model)
+    except ValueError as e:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            'Invalid model structure: ' + e.args[0],
+        )
 
     line_break_str = line_breaks[line_break]
     indent_str = indents[indent]
