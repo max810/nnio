@@ -9,11 +9,7 @@ from models import NetworkModel, FrameworkError, LayerTypes, Layer
 
 class KerasGenerator(FrameworkCodeGenerator, ABC):
     def _parse_regularizer(self, regularizer_params: dict):
-        l_type = regularizer_params['regularization_type']
-        if l_type == 'l1' or l_type == 'l2':
-            return self.cg.call(l_type, regularizer_params['l'], )
-        else:
-            return self.cg.call(l_type, l1=regularizer_params['l1'], l2=regularizer_params['l2'])
+        return self.cg.call('l1_l2', l1=regularizer_params['l1'], l2=regularizer_params['l2'])
 
     def _generate_imports(self) -> str:
         s = "from keras.layers import "
@@ -24,7 +20,7 @@ class KerasGenerator(FrameworkCodeGenerator, ABC):
         for l in self.model.layers:
             for k in l.params.keys():
                 if str(k).endswith('regularizer'):
-                    s += "from keras.regularizers import l1, l2, l1_l2" + self.cg.line_break()
+                    s += "from keras.regularizers import l1_l2" + self.cg.line_break()
                     break
             # breaking out of inner and outer loops
             else:
