@@ -25,3 +25,10 @@ class LayerSchema(Base):
 
     layer_type = Column(String, primary_key=True, index=True)
     layer_schema = Column(String)
+
+
+class Architecture(Base):
+    __tablename__ = 'architectures'
+
+    id = Column(Integer, primary_key=True, index=True)
+    data = Column(String)

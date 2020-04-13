@@ -9,7 +9,7 @@ import uvicorn
 from fastapi import FastAPI
 
 from DAL import db_models
-from routers import architecture_exporting, users, admin
+from routers import architecture_exporting, users, admin, architecture_sharing
 from sqlalchemy import create_engine, Table
 from sqlalchemy.orm import sessionmaker, Session
 from starlette.middleware.cors import CORSMiddleware
@@ -43,6 +43,12 @@ app.include_router(
 )
 
 app.include_router(
+    architecture_sharing.router,
+    prefix='/sharing',
+    tags=['Storing created architectures on the server']
+)
+
+app.include_router(
     users.router,
     prefix='/user',
     tags=['User authentication and authorization']
@@ -55,10 +61,6 @@ app.include_router(
 )
 
 SQLALCHEMY_DATABASE_URL = os.environ['DATABASE_URL']
-# SQLALCHEMY_DATABASE_URL = "postgres+psycopg2://{}:{}@localhost:5432/nnio".format(
-#     os.environ['NNIO_DB_USERNAME'],
-#     os.environ['NNIO_DB_PASSWORD'],
-# )
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL
