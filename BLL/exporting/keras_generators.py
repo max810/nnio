@@ -129,16 +129,34 @@ class KerasFunctionalGenerator(KerasGenerator):
         return s
 
     @staticmethod
-    def _generate_variable_name(layer_type: LayerTypes, layer_depth: int, names_counter: Dict[str, int]):
-        name = "{}_{}_{}".format(
+    def _generate_variable_name(layer_type: LayerTypes, names_counter: Dict[str, int]):
+        name = "{}_{}".format(
             layer_type.value.lower(),
-            layer_depth,
             names_counter[layer_type.value]
         )
 
         names_counter[layer_type.value] += 1
 
         return name
+
+    def _generate_layer_creation_code(self, layer: Layer, cg: PythonCodeGenerator, names_counter: Dict[str, int]):
+        params = layer.params.copy()
+        for k, v in params.items():
+            if str(k).endswith('regularizer'):
+                params[k] = self._parse_regularizer(v)
+            else:
+                params[k] = cg.wrap_literal(params[k])
+
+        params['name'] = cg.wrap_literal(layer.name)
+
+        layer_var_name = self._generate_variable_name(layer.type, names_counter)
+        # existing_tensor_variables[l.name] = layer_var_name
+        layer_line = "{} = {}".format(
+            layer_var_name,
+            cg.call(layer.type, **params)
+        )
+
+        return layer_line, layer_var_name
 
     def generate_code(self) -> str:
         with self.cg as cg:
@@ -150,33 +168,34 @@ class KerasFunctionalGenerator(KerasGenerator):
 
             variable_names_counter = defaultdict(lambda: 0)  # only for generating variable names
             existing_tensor_variables = dict()  # for accessing tensor variables created earlier
+            visited_layer_names = set()
 
-            # breadth-first traverse of the model graph
-            levels_of_layers_left = deque([input_layers])
-            depth = 0
-            while levels_of_layers_left:
-                current_level_layers = levels_of_layers_left.popleft()
-                next_level_layers = dict()  # dict not to include same layers (key by name) multiple times
+            # iterative depth-first traverse of the model graph
+            starting_layers = deque(input_layers)
+            while len(starting_layers) != 0:
+                current_start_layer = starting_layers.popleft()
+                inp_layer_line, inp_layer_var_name = self._generate_layer_creation_code(current_start_layer, cg,
+                                                                                        variable_names_counter)
+                cg.add_line(inp_layer_line)
+                existing_tensor_variables[current_start_layer.name] = inp_layer_var_name
+                visited_layer_names.add(current_start_layer.name)
+                layers_to_visit = deque(current_start_layer.outputs)
 
-                for l in current_level_layers:
-                    params = l.params.copy()
-                    for k, v in params.items():
-                        if str(k).endswith('regularizer'):
-                            params[k] = self._parse_regularizer(v)
-                        else:
-                            params[k] = cg.wrap_literal(params[k])
+                while len(layers_to_visit) != 0:
+                    current_layer = layers_to_visit.popleft()
 
-                    params['name'] = cg.wrap_literal(l.name)
+                    if not all(i.name in visited_layer_names for i in current_layer.inputs):
+                        # skip this layer for now
+                        continue
+                    else:
+                        visited_layer_names.add(current_layer.name)
 
-                    layer_var_name = self._generate_variable_name(l.type, depth, variable_names_counter)
-                    existing_tensor_variables[l.name] = layer_var_name
-                    layer_line = "{} = {}".format(
-                        layer_var_name,
-                        cg.call(l.type, **params)
-                    )
+                    layer_line, layer_var_name = self._generate_layer_creation_code(current_layer, cg,
+                                                                                    variable_names_counter)
+                    existing_tensor_variables[current_layer.name] = layer_var_name
 
-                    if l.inputs:
-                        layer_inputs_var_names = [existing_tensor_variables[i.name] for i in l.inputs]
+                    if current_layer.inputs:
+                        layer_inputs_var_names = [existing_tensor_variables[i.name] for i in current_layer.inputs]
                         if len(layer_inputs_var_names) == 1:
                             layer_call_inputs_args = layer_inputs_var_names[0]
                         else:
@@ -184,16 +203,11 @@ class KerasFunctionalGenerator(KerasGenerator):
 
                         layer_line += cg.call('', layer_call_inputs_args)
 
-                    if l.outputs:
-                        for output in l.outputs:
-                            next_level_layers[output.name] = output
+                    for output in current_layer.outputs:
+                        layers_to_visit.appendleft(output)
 
                     cg.add_line(layer_line)
-
-                if next_level_layers:
-                    levels_of_layers_left.append(list(next_level_layers.values()))
-
-                depth += 1
+                cg.add_line()
 
             model_inputs_args = [existing_tensor_variables[l.name] for l in input_layers]
             model_outputs_args = [existing_tensor_variables[l.name] for l in output_layers]

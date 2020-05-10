@@ -1,0 +1,66 @@
+{
+  "date_created": "2019-12-29T10:34:43.817Z",
+  "id": "32f3ef29-9434-409c-b627-0c94c6fc7e57",
+  "name": "myModel_weird",
+  "layers": [
+    {
+      "name": "inp_short",
+      "type": "Input",
+      "inputs": [],
+      "params": {
+        "shape": [
+          100
+        ]
+      }
+    },
+    {
+      "name": "conc",
+      "type": "Concatenate",
+      "inputs": [
+        "inp_short",
+        "dense2"
+      ],
+      "params": {}
+    },
+    {
+      "name": "inp_long",
+      "type": "Input",
+      "inputs": [],
+      "params": {
+        "shape": [
+          200
+        ]
+      }
+    },
+    {
+      "name": "dense1",
+      "type": "Dense",
+      "inputs": [
+        "inp_long"
+      ],
+      "params": {
+        "units": 150
+      }
+    },
+    {
+      "name": "dense2",
+      "type": "Dense",
+      "inputs": [
+        "dense1"
+      ],
+      "params": {
+        "units": 70
+      }
+    },
+    {
+      "name": "dense_out",
+      "type": "Dense",
+      "inputs": [
+        "conc"
+      ],
+      "params": {
+        "units": 1
+      }
+    }
+  ]
+}

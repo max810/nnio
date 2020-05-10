@@ -1,0 +1,27 @@
+{
+  "date_created": "2019-12-29T10:34:43.817Z",
+  "id": "32f3ef29-9434-409c-b627-0c94c6fc7e57",
+  "name": "myModel_reversed",
+  "layers": [
+    {
+      "name": "name2",
+      "type": "Dense",
+      "inputs": [
+        "name"
+      ],
+      "params": {
+        "units": 100
+      }
+    },
+    {
+      "name": "name",
+      "type": "Input",
+      "inputs": [],
+      "params": {
+        "shape": [
+          100
+        ]
+      }
+    }
+  ]
+}

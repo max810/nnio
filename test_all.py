@@ -113,6 +113,20 @@ def test_export_from_json_file_correct():
     assert response.status_code == HTTPStatus.OK
 
 
+def test_export_from_json_file_random_order_correct():
+    files = {"architecture-file": open("example_reversed.json", 'rt')}
+    response = client.request('post', '/architecture/export-from-json-file?framework=keras', files=files)
+
+    assert response.status_code == HTTPStatus.OK
+
+
+def test_export_from_json_file_complex_correct():
+    files = {"architecture-file": open("example_weird.json", 'rt')}
+    response = client.request('post', '/architecture/export-from-json-file?framework=keras', files=files)
+
+    assert response.status_code == HTTPStatus.OK
+
+
 def test_export_from_json_file_incorrect_data():
     files = {"architecture-file": StringIO("""{ "a": "b" }""")}
     response = client.request('post', '/architecture/export-from-json-file?framework=keras', files=files)

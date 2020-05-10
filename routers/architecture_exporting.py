@@ -1,6 +1,7 @@
 import json
 import logging
 import enum
+from json import JSONDecodeError
 
 import starlette.status as status
 from sqlalchemy.orm import Session
@@ -36,7 +37,7 @@ async def export_from_json_file(framework: Frameworks,
     try:
         architecture_dict = json.loads(architecture_file)
         model = ArchitectureDataModel(**architecture_dict)
-    except PydanticValidataionError as e:
+    except (PydanticValidataionError, JSONDecodeError) as e:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Invalid architecture file:\n{}".format(e))
 
     return await export_from_json_body(framework, model, line_break, indent,
