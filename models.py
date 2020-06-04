@@ -34,8 +34,12 @@ def load_layers():
         sess.close()
 
 
+class EnumStr(str, enum.Enum):
+    pass
+
+
 known_layers = load_layers()
-LayerTypes = enum.Enum('LayerTypes', zip(known_layers, known_layers))
+LayerTypes = EnumStr('LayerTypes', zip(known_layers, known_layers))
 
 
 class LayerBase(BaseModel):
