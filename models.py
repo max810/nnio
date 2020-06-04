@@ -1,8 +1,12 @@
+import enum
 from collections import deque, OrderedDict
 from datetime import datetime
-from enum import Enum
 from typing import List, Dict, Iterable
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
+from DAL import db_models
+from configs import SessionLocal
 
 indents = {
     'tabs': "\t",
@@ -21,14 +25,17 @@ class FrameworkError(Exception):
     pass
 
 
-class LayerTypes(str, Enum):
-    # TODO - create dynamically based on DB contents
-    Dense = "Dense"
-    Input = "Input"
-    BatchNormalization = "BatchNormalization"
-    Dropout = "Dropout"
-    Flatten = "Flatten"
-    Concatenate = "Concatenate"
+def load_layers():
+    sess: Session = SessionLocal()
+    try:
+        layers = [schema.layer_type for schema in sess.query(db_models.LayerSchema)]
+        return layers
+    finally:
+        sess.close()
+
+
+known_layers = load_layers()
+LayerTypes = enum.Enum('LayerTypes', zip(known_layers, known_layers))
 
 
 class LayerBase(BaseModel):

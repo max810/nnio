@@ -1,10 +1,9 @@
 import json
-from pathlib import Path
 
 from sqlalchemy.orm import Session
 from starlette.requests import Request
-from fastapi import Depends, FastAPI, HTTPException, APIRouter
-from starlette.responses import JSONResponse, Response
+from fastapi import Depends, APIRouter
+from starlette.responses import Response
 
 from DAL import db_models
 from routers.common import oauth2_scheme, templates
