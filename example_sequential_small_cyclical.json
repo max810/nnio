@@ -1,0 +1,48 @@
+{
+  "date_created": "2019-12-29T10:34:43.817Z",
+  "id": "32f3ef29-9434-409c-b627-0c94c6fc7e57",
+  "name": "myModel_1",
+  "layers": [
+    {
+      "name": "name",
+      "type": "Input",
+      "inputs": [],
+      "params": {
+        "shape": [
+          100
+        ]
+      }
+    },
+    {
+      "name": "name2",
+      "type": "Dense",
+      "inputs": [
+        "name",
+        "name3"
+      ],
+      "params": {
+        "units": 100
+      }
+    },
+    {
+      "name": "name3",
+      "type": "Dense",
+      "inputs": [
+        "name2"
+      ],
+      "params": {
+        "units": 100
+      }
+    },
+    {
+      "name": "name4",
+      "type": "Dense",
+      "inputs": [
+        "name3"
+      ],
+      "params": {
+        "units": 100
+      }
+    }
+  ]
+}

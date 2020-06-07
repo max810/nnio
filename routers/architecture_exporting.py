@@ -1,6 +1,8 @@
 import json
 import logging
 import enum
+from collections import deque
+from copy import copy, deepcopy
 from json import JSONDecodeError
 
 import starlette.status as status
@@ -12,7 +14,7 @@ from jsonschema.exceptions import ValidationError as JsonSchemaValidationError
 from pydantic import ValidationError as PydanticValidataionError
 
 from BLL.exporting.model_exporting import KNOWN_FRAMEWORKS, export_model
-from models import ArchitectureDataModel, NetworkModel, line_breaks, indents, FrameworkError, LayerTypes
+from models import ArchitectureDataModel, NetworkModel, line_breaks, indents, FrameworkError, LayerTypes, Layer
 from routers.admin import get_layers_schemas
 from routers.common import get_db
 
@@ -70,7 +72,7 @@ async def export_from_json_body(framework: Frameworks,
             status.HTTP_422_UNPROCESSABLE_ENTITY,
             'Invalid model structure: ' + e.args[0],
         )
-
+    validate_is_acyclic(deepcopy(net_model))
     line_break_str = line_breaks[line_break]
     indent_str = indents[indent]
 
@@ -119,6 +121,34 @@ def validate_member_in(member, collection, member_name):
     if member not in collection:
         raise HTTPException(status.HTTP_400_BAD_REQUEST,
                             f"Unknown {member_name} {member}, known {member_name}s are: {collection}")
+
+
+def validate_is_acyclic(net_model: NetworkModel):
+    # https://www.cs.hmc.edu/~keller/courses/cs60/s98/examples/acyclic/
+
+    leaf_nodes_left = deque()
+    num_leafs = 0
+    if len(net_model.layers) == 0:
+        # kind of workaround (model will have 0 layers if no output layers are found)
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, f"Architecture contains a cycle.")
+
+    for l in net_model.layers:
+        if len(l.outputs) == 0:
+            leaf_nodes_left.append(l)
+
+    while len(leaf_nodes_left) != 0:
+        l: Layer = leaf_nodes_left.popleft()
+        num_leafs += 1
+
+        for l_adj in l.inputs:
+            # this is stupidly inefficient
+            l_adj.outputs = [l_adj_out for l_adj_out in l_adj.outputs if l_adj_out.name != l.name]
+
+            if len(l_adj.outputs) == 0:
+                leaf_nodes_left.append(l_adj)
+
+    if num_leafs != len(net_model.layers):
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, f"Architecture contains a cycle.")
 
 
 def model_to_string(model: NetworkModel):

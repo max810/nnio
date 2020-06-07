@@ -120,6 +120,13 @@ def test_export_from_json_file_random_order_correct():
     assert response.status_code == HTTPStatus.OK
 
 
+def test_export_from_json_file_cyclic_incorrect():
+    files = {"architecture-file": open("example_sequential_small_cyclical.json", 'rt')}
+    response = client.request('post', '/architecture/export-from-json-file?framework=keras', files=files)
+
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+
+
 def test_export_from_json_file_complex_correct():
     files = {"architecture-file": open("example_weird.json", 'rt')}
     response = client.request('post', '/architecture/export-from-json-file?framework=keras', files=files)
