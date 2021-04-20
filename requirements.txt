@@ -26,7 +26,7 @@ packaging==19.0
 passlib==1.7.1
 pluggy==0.12.0
 psycopg2==2.8.3
-py==1.8.0
+py==1.10.0
 pycparser==2.19
 pydantic==0.30
 PyJWT==1.7.1
